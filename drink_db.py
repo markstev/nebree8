@@ -1,3 +1,4 @@
+import argparse
 import pycurl
 import re
 import sys
@@ -35,9 +36,9 @@ class DrinkDatabase(object):
     return buf.getvalue()
 
   def _ParseFirstPage(self, first_page_html):
-    #if 
-    recipes = re.findall("recipe_detail\?id=\d+\" title=\"click here for the recipe\">[\w ]+</a>",
-                         first_page_html)
+    recipes = re.findall(
+        "recipe_detail\?id=\d+\" title=\"click here for the recipe\">[\w ]+</a>",
+        first_page_html)
     recipe_name_and_url = []
     for recipe in recipes:
       m = re.match("(recipe_detail\?id=\d+)\" .+recipe\">([\w ]+)</a>", recipe)
@@ -63,6 +64,7 @@ class DrinkDatabase(object):
                                   second_page_html)
     ingredients = []
     for ingredient in ingredients_html:
+      ingredient = ingredient.lower()
       m = re.match("\"recipeMeasure\">(.*)<a href=\"ingr_detail\?id=.*\">(.*)</a>", ingredient)
       ingredients.append((m.group(2), self.ParseVolume(m.group(1))))
     return ingredients
@@ -70,6 +72,7 @@ class DrinkDatabase(object):
   def SearchForIngredients(self, drink_name):
     """Returns a list of ingredients, or an empty list for not found"""
     #TODO(Mark): alternates
+    #TODO(Mark): directions
     recipe_urls = self._ParseFirstPage(self._InitialSearch(drink_name))
     for name, url in recipe_urls:
       if name.lower() == drink_name.lower():
@@ -77,11 +80,29 @@ class DrinkDatabase(object):
         return self._ParseSecondPage(page)
 
   def ParseVolume(self, volume):
+    volume = (volume
+        .replace("ounce", "oz")
+        .replace("ounces", "oz")
+        .replace("tbsp", "tsp")
+        .replace("dashes", "dash")
+        .replace("wedges", "wedge")
+        .replace(" of", "")
+        .replace("float", ""))
     volume = volume.strip().rstrip()
     if " oz" in volume:
       units = "oz"
       volume = volume.replace(" oz", "")
+    elif " tsp" in volume:
+      units = "tsp"
+      volume = volume.replace(" tsp", "")
+    elif " dash" in volume:
+      units = "dash"
+      volume = volume.replace(" dash", "")
+    elif " wedge" in volume:
+      units = "wedge"
+      volume = volume.replace(" wedge", "")
     else:
+      # TODO(mark) no-unit items, like eggs and limes.
       return (None, None)
     total = 0.0
     for portion in volume.split(" "):
@@ -102,7 +123,11 @@ def main(args):
   print drink_db.ParseVolume("1 oz")
   print drink_db.ParseVolume("1/4 oz")
   print drink_db.ParseVolume("2 1/2 oz")
-  ingredients = drink_db.SearchForIngredients("martini")
+  parser = argparse.ArgumentParser(description='Drink to look up')
+  parser.add_argument('--drink', type=str, nargs="?", default="margarita",
+                      help='Name of a drink')
+  args = parser.parse_args()
+  ingredients = drink_db.SearchForIngredients(args.drink)
   for ingredient in ingredients:
     print "Ingredient: %s; Volume: %f %s" % (ingredient[0], ingredient[1][1], ingredient[1][0])
 

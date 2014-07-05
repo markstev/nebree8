@@ -57,8 +57,7 @@ class RobotRail(object):
 
   
 def main(args):
-  print args
-  parser = argparse.ArgumentParser(description='Process some integers.')
+  parser = argparse.ArgumentParser(description='Move robot stepper motor.')
   parser.add_argument('--steps', type=int, nargs="?", default=1,
                       help='Steps to move the motor')
   parser.add_argument('--inches', type=float, nargs="?", default=0,
