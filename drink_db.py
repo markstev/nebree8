@@ -65,8 +65,11 @@ class DrinkDatabase(object):
     ingredients = []
     for ingredient in ingredients_html:
       ingredient = ingredient.lower()
-      m = re.match("\"recipeMeasure\">(.*)<a href=\"ingr_detail\?id=.*\">(.*)</a>", ingredient)
-      ingredients.append((m.group(2), self.ParseVolume(m.group(1))))
+      m = re.match("\"recipemeasure\">([^<]*)<a href=\"ingr_detail\?id=.*\">([^<]*)</a>", ingredient)
+      if m and m.group(1) and m.group(2):
+        ingredients.append((m.group(2), self.ParseVolume(m.group(1))))
+      else:
+        print "Could not parse: %s" % ingredient
     return ingredients
 
   def SearchForIngredients(self, drink_name):
@@ -102,8 +105,7 @@ class DrinkDatabase(object):
       units = "wedge"
       volume = volume.replace(" wedge", "")
     else:
-      # TODO(mark) no-unit items, like eggs and limes.
-      return (None, None)
+      units = "units"
     total = 0.0
     for portion in volume.split(" "):
       try:
@@ -113,6 +115,7 @@ class DrinkDatabase(object):
         else:
           total += float(portion)
       except ValueError, e:
+        print volume
         print portion
         raise e
     return (units, total)
