@@ -78,6 +78,8 @@ def main(args):
   rail = RobotRail(motor)
   if args.positions:
     rail.FillPositions(args.positions)
+    gpio.cleanup()
+    return
   forward = (args.backward != "False")
   if args.inches:
     steps = InchesToSteps(args.inches)
