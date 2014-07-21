@@ -9,9 +9,9 @@ import time
 import RPi.GPIO as gpio
 
 class Outputs(enum.Enum):
-  STEPPER_DIR = 17
-  STEPPER_PULSE = 27
-  STEPPER_ENABLE = 22
+  # STEPPER_DIR = 17
+  # STEPPER_PULSE = 27
+  # STEPPER_ENABLE = 22
 
   SHIFT_REG_CLOCK = 7  # bottom -> green -> clock
   #SHIFT_REG_ENABLE = 8  # mid
@@ -26,6 +26,9 @@ class Outputs(enum.Enum):
   VALVE_5 = 1005
   VALVE_6 = 1006
   VALVE_7 = 1007
+
+class Inputs(enum.Enum):
+  LIMIT_SWITCH = 4
   
 _SHIFT_REG_SLEEP_TIME = 0.1 # 1 ms -> 1khz
 _SHIFT_REG_ADDRESS_OFFSET = 1000
@@ -37,11 +40,13 @@ class IOBank(object):
     for output in Outputs:
       if output.value < _SHIFT_REG_ADDRESS_OFFSET:
         gpio.setup(output.value, gpio.OUT)
+    for pin in Inputs:
+      gpio.setup(pin.value, gpio.IN, pull_up_down=gpio.PUD_UP)
     self.shift_reg = [0, 0]
     #self.WriteOutput(Outputs.SHIFT_REG_ENABLE, 0)
 
   def ReadInput(self, input_enum):
-    pass
+    return gpio.input(input_enum.value)
 
   def WriteOutput(self, output_enum, value):
     if output_enum.value < _SHIFT_REG_ADDRESS_OFFSET:

@@ -2,6 +2,7 @@
 
 import RPi.GPIO as gpio
 import argparse
+import io_bank
 import sys
 import time
 
@@ -27,6 +28,7 @@ class StepperMotor(object):
   def __init__(self, dry_run=False):
     self.pulse_state = False
     self.dry_run = dry_run
+    self.io = io_bank.IOBank()
 
   def Move(self, steps, forward=1):
     if self.dry_run:
@@ -37,6 +39,8 @@ class StepperMotor(object):
       gpio.output(pul_pin, int(self.pulse_state))
       time.sleep(0.001)  # one millisecond
       self.pulse_state = not self.pulse_state
+      if (i % 100 == 0 and forward and self.io.ReadInput(io_bank.Inputs.LIMIT_SWITCH) == 0):
+        return  # Hit endge of the rail!
 
 def InchesToSteps(inches):
   return int(inches / 3.75 * 800)
