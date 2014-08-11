@@ -8,10 +8,11 @@ function install_once {
 }
 
 function initialize {
-  rmmod i2c-bcm2708
-  rmmod i2c-dev
+  rmmod i2c-bcm2708 || echo 'failed to unload -- ignoring'
+  rmmod i2c-dev || echo 'failed to unload -- ignoring'
   modprobe i2c-bcm2708
   modprobe i2c-dev
+  lsmod | grep i2c
 }
 
 function test_config {
