@@ -15,9 +15,9 @@ def DebugPrint(*args):
     #time.sleep(0.01)
 
 class Outputs(enum.Enum):
-  # STEPPER_DIR = 17
-  # STEPPER_PULSE = 27
-  # STEPPER_ENABLE = 22
+  STEPPER_DIR = 22
+  STEPPER_PULSE = 27
+  STEPPER_ENABLE = 17
 
   #SHIFT_REG_ENABLE = 8  # mid
   SHIFT_REG_CLOCK = 7  # bottom -> green -> clock
@@ -37,8 +37,8 @@ class Outputs(enum.Enum):
   COMPRESSOR = 2
 
 class Inputs(enum.Enum):
-  LIMIT_SWITCH_POS = 4
-  LIMIT_SWITCH_NEG = 3
+  LIMIT_SWITCH_POS = 3
+  LIMIT_SWITCH_NEG = 4
   
 _SHIFT_REG_SLEEP_TIME = 0.1 # 1 ms -> 1khz
 _SHIFT_REG_ADDRESS_OFFSET = 1000

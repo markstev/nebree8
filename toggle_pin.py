@@ -6,9 +6,9 @@ import io_bank
 import sys
 import time
 
-dir_pin = 17
+dir_pin = 22
 pul_pin = 27
-en_pin = 22
+en_pin = 17
 
 #3.75 inches per revolution
 
