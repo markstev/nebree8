@@ -29,6 +29,13 @@ class StepperMotor(object):
     self.pulse_state = False
     self.dry_run = dry_run
     self.io = io_bank.IOBank()
+    self.colliding_positive = False
+    def HitPositiveRail(channel):
+      self.colliding_positive = True
+    self.io.AddCallback(io_bank.Inputs.LIMIT_SWITCH, gpio.FALLING,
+        HitPositiveRail)
+    #lambda x: self.HitPositiveRail)
+
 
   def Move(self, steps, forward=1):
     if self.dry_run:
@@ -36,11 +43,13 @@ class StepperMotor(object):
     gpio.output(pul_pin, 0)
     gpio.output(dir_pin, forward)
     for i in range(steps):
-      gpio.output(pul_pin, int(self.pulse_state))
-      time.sleep(0.001)  # one millisecond
-      self.pulse_state = not self.pulse_state
-      if (i % 100 == 0 and forward and self.io.ReadInput(io_bank.Inputs.LIMIT_SWITCH) == 0):
-        return  # Hit endge of the rail!
+      if not (self.colliding_positive and forward):
+        gpio.output(pul_pin, int(self.pulse_state))
+        time.sleep(0.001)  # one millisecond
+        self.pulse_state = not self.pulse_state
+      if not forward:
+        self.colliding_positive = False
+    gpio.output(pul_pin, 0)
 
 def InchesToSteps(inches):
   return int(inches / 3.75 * 800)

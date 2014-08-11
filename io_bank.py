@@ -18,7 +18,7 @@ class Outputs(enum.Enum):
   SHIFT_REG_RCLOCK = 8  # mid
   SHIFT_REG_SERIAL = 25  # top
 
-  VALVE_0 = 1000
+  VALVE_0 = 3  # green; 2 is above it and yellow
   VALVE_1 = 1001
   VALVE_2 = 1002
   VALVE_3 = 1003
@@ -26,6 +26,8 @@ class Outputs(enum.Enum):
   VALVE_5 = 1005
   VALVE_6 = 1006
   VALVE_7 = 1007
+
+  COMPRESSOR = 2
 
 class Inputs(enum.Enum):
   LIMIT_SWITCH = 4
@@ -47,6 +49,10 @@ class IOBank(object):
 
   def ReadInput(self, input_enum):
     return gpio.input(input_enum.value)
+
+  # rising_or_falling should be gpio.RISING or gpio.FALLING
+  def AddCallback(self, input_enum, rising_or_falling, callback):
+    gpio.add_event_detect(input_enum.value, rising_or_falling, callback=callback)
 
   def WriteOutput(self, output_enum, value):
     if output_enum.value < _SHIFT_REG_ADDRESS_OFFSET:
