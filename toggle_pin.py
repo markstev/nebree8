@@ -30,10 +30,15 @@ class StepperMotor(object):
     self.dry_run = dry_run
     self.io = io_bank.IOBank()
     self.colliding_positive = False
+    self.colliding_negative = False
     def HitPositiveRail(channel):
       self.colliding_positive = True
-    self.io.AddCallback(io_bank.Inputs.LIMIT_SWITCH, gpio.FALLING,
+    def HitNegativeRail(channel):
+      self.colliding_negative = True
+    self.io.AddCallback(io_bank.Inputs.LIMIT_SWITCH_POS, gpio.FALLING,
         HitPositiveRail)
+    self.io.AddCallback(io_bank.Inputs.LIMIT_SWITCH_NEG, gpio.FALLING,
+        HitNegativeRail)
     #lambda x: self.HitPositiveRail)
 
 
@@ -43,11 +48,14 @@ class StepperMotor(object):
     gpio.output(pul_pin, 0)
     gpio.output(dir_pin, forward)
     for i in range(steps):
-      if not (self.colliding_positive and forward):
+      if (not ((self.colliding_positive and forward)
+               or (self.colliding_negative and not forward))):
         gpio.output(pul_pin, int(self.pulse_state))
         time.sleep(0.001)  # one millisecond
         self.pulse_state = not self.pulse_state
-      if not forward:
+      if forward:
+        self.colliding_negative = False
+      else:
         self.colliding_positive = False
     gpio.output(pul_pin, 0)
 
