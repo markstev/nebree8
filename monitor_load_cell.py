@@ -1,5 +1,5 @@
 #!/usr/bin/python
-
+import math
 import time
 import threading
 from Adafruit_ADS1x15 import ADS1x15
@@ -14,7 +14,15 @@ class LoadCellMonitor(threading.Thread):
         self.shutdown = False
 
     def recent(self, n):
+        """Return the last n readings as (time, value) tuples."""
         return list(deque(self.buffer, n))
+
+    def recent_summary(self, n):
+        """Return the mean and standard deviation of the last n readings."""
+        recs = self.recent(n)
+        mean = sum(v for t, v in recs)
+        stddev = math.sqrt(sum((v - mean)**2 for t, v in recs) / (n - 1))
+        return mean, stddev
 
     def stop(self):
         self.shutdown = True
@@ -22,22 +30,22 @@ class LoadCellMonitor(threading.Thread):
 
     def run(self):
         while not self.shutdown:
-            val = self.adc.readADCDifferential01(4096, 250)/1000.0
+            val = -self.adc.readADCDifferential01(4096, 500)/1000.0
             ts = time.time()
             self.buffer.append((ts, val))
 
 
 def main():
   from math import sqrt
+  N = 100000
   while True:
-    monitor = LoadCellMonitor(bufsize=100000)
+    monitor = LoadCellMonitor(bufsize=N)
+    monitor.daemon = True
     monitor.start()
     time.sleep(1)
     monitor.stop()
-    recs = monitor.recent(100000)
-    n = len(recs)
-    mean = sum(v for t, v in recs)
-    stddev = sqrt(sum((v - mean)**2 for t, v in recs) / (n - 1))
+    n = len(monitor.recent(N))
+    mean, stddev = monitor.recent_summary(N)
     print "n=%i mean=%f stddev=%f" % (n, mean, stddev)
 
 
