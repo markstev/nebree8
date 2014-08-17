@@ -2,14 +2,7 @@
 
 import BaseHTTPServer
 import logging
-
-class LoadCellMonitor(object):
-    def __init__(self): pass
-    def recent(self, n):
-        from math import sin, cos
-        from random import gauss
-        for i in range(n):
-            yield (i, gauss(sin(i * 1e-3), abs(cos(i *1e-3))))
+from monitor_load_cell import LoadCellMonitor
 
 class NEEBre8Handler(BaseHTTPServer.BaseHTTPRequestHandler):
     def __init__(self, load_cell, *args, **kwargs):
@@ -57,19 +50,22 @@ class NEEBre8Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         global httpd
         import threading
         class KillServer(threading.Thread):
-            def run(self): httpd.shutdown()
+            def run(self):
+              self.load_cell.stop()
+              httpd.shutdown()
         #KillServer().start()
 
     def monitor_load_cell(self):
         self.send_responsecode_and_headers(200, (("Content-type", "text/json"),))
         self.wfile.write("var data = [");
-        self.wfile.write(','.join('[%s, %f]' % rec for rec in self.load_cell.recent(100)))
+        self.wfile.write(','.join('[%s, %f]' % rec for rec in self.load_cell.recent(1000)))
         self.wfile.write("];");
 
 
 def StartServer(port):
     global httpd # DEBUG
     load_cell = LoadCellMonitor()
+    load_cell.start()
     httpd = BaseHTTPServer.HTTPServer(('', port), lambda *args: NEEBre8Handler(load_cell, *args))
     print "serving at http://localhost:%i" % port
     try:

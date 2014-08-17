@@ -48,8 +48,11 @@
   // create a simple data array that we'll plot with a line (this array represents only the Y values, X will just be the index location)
   // var data = read in using /load_cell.json
 
-  var x = d3.scale.linear().domain([0, data.length]).range([0, w]);
-  var y = d3.scale.linear().domain([-2, 2]).range([h, 0]);
+  function get_x(tup) { return tup[0]; }
+  function get_y(tup) { return tup[1]; }
+
+  var x = d3.scale.linear().domain(d3.extent(data.map(get_x))).range([0, w]);
+  var y = d3.scale.linear().domain(d3.extent(data.map(get_y))).range([h, 0]);
     // automatically determining max range can work something like this
     // var y = d3.scale.linear().domain([0, d3.max(data)]).range([h, 0]);
 
