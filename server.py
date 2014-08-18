@@ -47,14 +47,6 @@ class NEEBre8Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         else:
             self.send_response(404)
             self.end_headers()
-        #DEBUG
-        global httpd
-        import threading
-        class KillServer(threading.Thread):
-            def run(self):
-              self.load_cell.stop()
-              httpd.shutdown()
-        #KillServer().start()
 
     def monitor_load_cell(self):
         self.send_responsecode_and_headers(200, (("Content-type", "text/json"),))
@@ -64,14 +56,15 @@ class NEEBre8Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 
 def StartServer(port):
-    global httpd # DEBUG
     load_cell = LoadCellMonitor()
     load_cell.start()
     httpd = BaseHTTPServer.HTTPServer(('', port), lambda *args: NEEBre8Handler(load_cell, *args))
     print "serving at http://%s:%i" % (socket.gethostname(), port)
     try:
         httpd.serve_forever(.2)
-    except KeyboardInterrupt: pass
+    except KeyboardInterrupt:
+        load_cell.stop()
+        httpd.shutdown()
 
 
 def main():
