@@ -57,9 +57,9 @@ class NEEBre8Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def monitor_load_cell(self):
         self.send_responsecode_and_headers(200, (("Content-type", "text/json"),))
-        self.wfile.write("var data = [");
+        self.wfile.write("[");
         self.wfile.write(','.join('[%s, %f]' % rec for rec in self.load_cell.recent(1000)))
-        self.wfile.write("];");
+        self.wfile.write("]");
 
 
 def StartServer(port):

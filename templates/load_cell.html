@@ -4,8 +4,14 @@
   <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
   <style>
     /* tell the SVG path to be a thin blue line without any area fill */
-    path {
-      stroke: steelblue;
+    .raw-line {
+      stroke: gray;
+      stroke-width: 1;
+      fill: none;
+    }
+
+    .avg-line {
+      stroke: blue;
       stroke-width: 1;
       fill: none;
     }
@@ -36,8 +42,13 @@
 <div id="graph" class="aGraph" style="position:absolute;top:0px;left:0; float:left;"></div>
 
 
-<script src="/load_cell.json"></script>
 <script>
+  var data = [[0, 0], [0, 0]];
+  var graph;
+  var line;
+  var x;
+  var y;
+
   /* implementation heavily influenced by http://bl.ocks.org/1166403 */
   
   // define dimensions of graph
@@ -57,20 +68,10 @@
     // var y = d3.scale.linear().domain([0, d3.max(data)]).range([h, 0]);
 
   // create a line function that can convert data[] into x and y points
-  var line = d3.svg.line()
+  line = d3.svg.line()
     // assign the X function to plot our line as we wish
-    .x(function(d,i) { 
-      // verbose logging to show what's actually being done
-      console.log('Plotting X value for data point: ' + d + ' using index: ' + i + ' to be at: ' + x(i) + ' using our xScale.');
-      // return the X coordinate where we want to plot this datapoint
-      return x(d[0]); 
-    })
-    .y(function(d) { 
-      // verbose logging to show what's actually being done
-      console.log('Plotting Y value for data point: ' + d + ' to be at: ' + y(d) + " using our yScale.");
-      // return the Y coordinate where we want to plot this datapoint
-      return y(d[1]); 
-    })
+    .x(function(d,i) { return x(d[0]); })
+    .y(function(d) { return y(d[1]); })
 
     // Add an SVG element with the desired dimensions and margin.
     var graph = d3.select("#graph").append("svg:svg")
@@ -83,7 +84,7 @@
     var xAxis = d3.svg.axis().scale(x).tickSize(-h).tickSubdivide(true);
     // Add the x-axis.
     graph.append("svg:g")
-          .attr("class", "x axis")
+          .attr("class", "x-axis")
           .attr("transform", "translate(0," + h + ")")
           .call(xAxis);
 
@@ -91,16 +92,43 @@
     // create left yAxis
     var yAxisLeft = d3.svg.axis().scale(y).ticks(4).orient("left");
     // Add the y-axis to the left
-    graph.append("svg:g")
-          .attr("class", "y axis")
+    graph.select("g")
+          .attr("class", "y-axis")
           .attr("transform", "translate(-25,0)")
           .call(yAxisLeft);
     
-      // Add the line by appending an svg:path element with the data line we created above
-    // do this AFTER the axes above so that the line is above the tick-lines
-      graph.append("svg:path").attr("d", line(data));
-    
+    graph.append("svg:path").attr("class", "raw-line");
+    graph.append("svg:path").attr("class", "avg-line");
+    function refreshData() {
+      d3.json("/load_cell.json", function(error, json) {
+        if (error) return console.warn(error);
+        console.log("Read " + json.length + " records.");
+        data = json;
+        var avg_data = data.map(function (_, i) {
+          var s = data.slice(i, i + 50);
+          return [data[i][0], d3.sum(s.map(get_y)) / s.length];
+        });
+        x = d3.scale.linear().domain(d3.extent(data.map(get_x))).range([0, w]);
+        console.log("y extent", d3.extent(data.map(get_y)))
+        y = d3.scale.linear().domain([0, 1]).range([h, 0]);
+        graph.select(".y-axis")
+              .attr("transform", "translate(-25,0)")
+              .call(yAxisLeft);
+        graph.select(".x-axis")
+              .attr("transform", "translate(0," + h + ")")
+              .call(xAxis);
+        graph.select(".raw-line")
+          .attr("d", line(data));
+        graph.select(".avg-line")
+          .attr("d", line(avg_data));
+      });
+    }
 
+    function refreshContinuously() {
+      window.setTimeout(function() { refreshData(); refreshContinuously(); }, 200);
+    }
+
+    refreshContinuously();
 </script>
 </body>
 </html>
