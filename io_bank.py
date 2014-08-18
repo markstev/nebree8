@@ -20,21 +20,18 @@ class Outputs(enum.Enum):
   STEPPER_ENABLE = 17
 
   #SHIFT_REG_ENABLE = 8  # mid
-  SHIFT_REG_CLOCK = 7  # bottom -> green -> clock
-  SHIFT_REG_RCLOCK = 8  # mid
-  SHIFT_REG_SERIAL = 25  # top
+  SHIFT_REG_CLOCK = 8
+  SHIFT_REG_RCLOCK = 25
+  SHIFT_REG_SERIAL = 7
 
-  #UNUSED = 3 # green; 2 is above it and yellow
-  VALVE_0 = 1006
-  VALVE_1 = 1001
-  VALVE_2 = 1002
-  VALVE_3 = 1003
-  VALVE_4 = 1004
-  VALVE_5 = 1005
-  VALVE_6 = 1000
-  VALVE_7 = 1007
-
-  COMPRESSOR = 2
+  X_6 = 1000
+  COMPRESSOR = 1001
+  X_2 = 1002
+  VALVE_0_WIRED = 1003
+  VALVE_1_WIRED = 1004
+  X_5 = 1005
+  X_0 = 1006
+  X_7 = 1007
 
 class Inputs(enum.Enum):
   LIMIT_SWITCH_POS = 3
@@ -52,10 +49,8 @@ class IOBank(object):
         gpio.setup(output.value, gpio.OUT)
     for pin in Inputs:
       gpio.setup(pin.value, gpio.IN, pull_up_down=gpio.PUD_UP)
-    self.shift_reg = [0, 0]
-    #self.WriteOutput(Outputs.SHIFT_REG_ENABLE, 0)
-    self.Shift(0xff)
-    self.Shift(0)
+    self.current_shifted_byte = [0] * 8
+    self.WriteOutput(Outputs.COMPRESSOR, 0)
 
   def ReadInput(self, input_enum):
     return gpio.input(input_enum.value)
@@ -73,46 +68,23 @@ class IOBank(object):
       # 1: update current shift reg bytes overall
       # 2: set bit, then toggle clock
       shift_register_index = output_enum.value - _SHIFT_REG_ADDRESS_OFFSET
-
-      byte = value
-      DebugPrint("output value is ", byte)
-      for unused_i in range(shift_register_index):
-        byte = byte << 1
-      DebugPrint("shifted value is ", byte)
-      self.Shift(byte)
-
-      # self.shift_reg[shift_register_index] = value
-
-      # shift_reg_backwards = self.shift_reg
-      # shift_reg_backwards.reverse()
-      # for bit in shift_reg_backwards:
-      #   self.WriteOutput(Outputs.SHIFT_REG_SERIAL, bit)
-      #   time.sleep(_SHIFT_REG_SLEEP_TIME)
-      #   self.WriteOutput(Outputs.SHIFT_REG_CLOCK, 0)
-      #   time.sleep(_SHIFT_REG_SLEEP_TIME)
-      #   self.WriteOutput(Outputs.SHIFT_REG_CLOCK, 1)
-      #   time.sleep(_SHIFT_REG_SLEEP_TIME)
-      #   self.WriteOutput(Outputs.SHIFT_REG_RCLOCK, 0)
-      #   time.sleep(_SHIFT_REG_SLEEP_TIME)
-      #   self.WriteOutput(Outputs.SHIFT_REG_RCLOCK, 1)
-      #   time.sleep(_SHIFT_REG_SLEEP_TIME)
+      self.current_shifted_byte[shift_register_index] = value
+      self.Shift(self.current_shifted_byte)
 
   def Shift(self, byte): 
     SLEEP_TIME = 0.000
+    byte = list(byte)
+    byte.reverse()
     DebugPrint("Writing byte ", byte, " into shift register.")
-    for bitnum in range(8):
-      foodbit = bool((byte & 0x0080) >> 7)
+    for bitnum, bit in enumerate(byte):
+      foodbit = bit
       DebugPrint("food piece ", 7 - bitnum, " into mouth with this piece of food ", foodbit, " and chew")
       self.WriteOutput(Outputs.SHIFT_REG_SERIAL, foodbit)
       time.sleep(SLEEP_TIME)
-      #GPIO.output(gpiomap[mouth],foodbit)
       self.WriteOutput(Outputs.SHIFT_REG_CLOCK, gpio.LOW)
       time.sleep(SLEEP_TIME)
-      #GPIO.output(gpiomap[chew], GPIO.LOW)
       self.WriteOutput(Outputs.SHIFT_REG_CLOCK, gpio.HIGH)
       time.sleep(SLEEP_TIME)
-      #GPIO.output(gpiomap[chew], GPIO.HIGH)
-      byte = byte << 1
     self.WriteOutput(Outputs.SHIFT_REG_CLOCK, gpio.LOW)  # Reset to a safe state.
     DebugPrint("and swallow")
     self.WriteOutput(Outputs.SHIFT_REG_RCLOCK, gpio.LOW)

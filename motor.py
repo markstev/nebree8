@@ -42,7 +42,7 @@ class StepperMotor(object):
     #lambda x: self.HitPositiveRail)
 
 
-  def Move(self, steps, forward=1):
+  def Move(self, steps, forward=1, ramp_seconds=0):
     if self.dry_run:
       print "DRY RUN: Moving %d steps in direction: %d" % (steps, forward)
     gpio.output(pul_pin, 0)
@@ -76,6 +76,11 @@ class RobotRail(object):
       print "At position: %f" % position
       time.sleep(2.0)
 
+  def CalibrateToZero(self):
+    steps = InchesToSteps(200)
+    self.motor.Move(steps, forward=True)
+    self.position = 0
+
   
 def main(args):
   parser = argparse.ArgumentParser(description='Move robot stepper motor.')
@@ -89,6 +94,8 @@ def main(args):
                       help='Whether to move motors')
   parser.add_argument('--positions', type=float, nargs="+", default=(),
                       help='List of positions to move the truck through')
+  parser.add_argument('--absolute', type=bool, nargs="?", default=False,
+                      help='Whether calibrate position')
   args = parser.parse_args()
   print args
   # For the NEMA 14 12v 350mA (#324) stepper motors from AdaFruit:
@@ -98,6 +105,8 @@ def main(args):
   motor = StepperMotor(args.dry_run)
   rail = RobotRail(motor)
   if args.positions:
+    if args.absolute:
+      rail.CalibrateToZero()
     rail.FillPositions(args.positions)
     gpio.cleanup()
     return
