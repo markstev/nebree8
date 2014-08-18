@@ -1,27 +1,58 @@
 #!/usr/bin/python
-
-import time, signal, sys
+import math
+import time
+import threading
 from Adafruit_ADS1x15 import ADS1x15
+from collections import deque
 
-def signal_handler(signal, frame):
-        #print 'You pressed Ctrl+C!'
-        sys.exit(0)
-signal.signal(signal.SIGINT, signal_handler)
-#print 'Press Ctrl+C to exit'
 
-ADS1015 = 0x00	# 12-bit ADC
-ADS1115 = 0x01	# 16-bit ADC
+class LoadCellMonitor(threading.Thread):
+    def __init__(self, bufsize=10000):
+        super(LoadCellMonitor, self).__init__()
+        self.buffer = deque(maxlen=bufsize)
+        try:
+          self.adc = ADS1x15(ic=1)  # 1 for ADS1115
+        except IOError, e:
+          print "Failed to open i2c device -- have you run ./setup.py initialize?\n"
+          raise
+        self.shutdown = False
 
-# Initialise the ADC using the default mode (use default I2C address)
-# Set this to ADS1015 or ADS1115 depending on the ADC you are using!
-adc = ADS1x15(ic=ADS1115)
+    def recent(self, n):
+        """Return the last n readings as (time, value) tuples."""
+        return list(deque(self.buffer, n))
 
-# Read channels 2 and 3 in single-ended mode, at +/-4.096V and 250sps
-volts0 = adc.readADCSingleEnded(0, 4096, 250)/1000.0
-volts1 = adc.readADCSingleEnded(1, 4096, 250)/1000.0
+    def recent_summary(self, n):
+        """Return the mean and standard deviation of the last n readings."""
+        recs = self.recent(n)
+        mean = sum(v for t, v in recs)
+        stddev = math.sqrt(sum((v - mean)**2 for t, v in recs) / (n - 1))
+        return mean, stddev
 
-# Now do a differential reading of channels 2 and 3
-voltsdiff = adc.readADCDifferential01(4096, 250)/1000.0
+    def stop(self):
+        self.shutdown = True
+        self.join()
 
-# Display the two different reading for comparison purposes
-print "%.8f %.8f %.8f %.8f" % (volts0, volts1, volts1-volts0, -voltsdiff)
+    def run(self):
+        while not self.shutdown:
+            val = -self.adc.readADCDifferential01(4096, 500)/1000.0
+            ts = time.time()
+            self.buffer.append((ts, val))
+
+
+def main():
+  from math import sqrt
+  N = 100000
+  while True:
+    monitor = LoadCellMonitor(bufsize=N)
+    monitor.daemon = True
+    monitor.start()
+    time.sleep(1)
+    monitor.stop()
+    n = len(monitor.recent(N))
+    mean, stddev = monitor.recent_summary(N)
+    print "n=%i mean=%f stddev=%f" % (n, mean, stddev)
+
+
+
+if __name__ == "__main__":
+  main()

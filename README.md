@@ -13,6 +13,15 @@ A stepper motor is used to move the chuck along the track. See toggle_pin.py.
 
 Valves are actuated using io_bank.py.
 
+Setting up your working directory
+---------------------------------
+After cloning this repo, run
+$ git submodule init
+$ git submodule update
+to update the adafruit repo used for i2c on the pi. Run
+$ sudo ./setup.sh all
+to install needed packages
+
 ADS1x15: 4-channel 16-bit ADC
 ------------------------------
 http://www.adafruit.com/products/1085
