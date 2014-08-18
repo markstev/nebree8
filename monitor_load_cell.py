@@ -10,7 +10,11 @@ class LoadCellMonitor(threading.Thread):
     def __init__(self, bufsize=10000):
         super(LoadCellMonitor, self).__init__()
         self.buffer = deque(maxlen=bufsize)
-        self.adc = ADS1x15(ic=1)  # 1 for ADS1115
+        try:
+          self.adc = ADS1x15(ic=1)  # 1 for ADS1115
+        except IOError, e:
+          print "Failed to open i2c device -- have you run ./setup.py initialize?\n"
+          raise
         self.shutdown = False
 
     def recent(self, n):

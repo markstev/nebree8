@@ -2,6 +2,7 @@
 
 import BaseHTTPServer
 import logging
+import socket
 from monitor_load_cell import LoadCellMonitor
 
 class NEEBre8Handler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -67,7 +68,7 @@ def StartServer(port):
     load_cell = LoadCellMonitor()
     load_cell.start()
     httpd = BaseHTTPServer.HTTPServer(('', port), lambda *args: NEEBre8Handler(load_cell, *args))
-    print "serving at http://localhost:%i" % port
+    print "serving at http://%s:%i" % (socket.gethostname(), port)
     try:
         httpd.serve_forever(.2)
     except KeyboardInterrupt: pass
