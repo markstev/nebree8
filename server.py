@@ -1,75 +1,45 @@
 #!/usr/bin/env python
 
+import webapp2
 import BaseHTTPServer
 import logging
+import re
 import socket
 from monitor_load_cell import LoadCellMonitor
 
-class NEEBre8Handler(BaseHTTPServer.BaseHTTPRequestHandler):
-    def __init__(self, load_cell, *args, **kwargs):
-        self.load_cell = load_cell
-        self.dispatch = [
-                ('/', lambda: self.serve('index.html')),
-                ('/load_cell', lambda: self.serve('load_cell.html')),
-                ('/load_cell.json', self.monitor_load_cell),
-        ]
-        BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, *args, **kwargs)
 
-    def send_responsecode_and_headers(self, code, headers=()):
-        self.send_response(code)
-        for header in headers:
-            self.send_header(*header)
-        self.end_headers()
+def ServeFile(filename):
+    class ServeFileImpl(webapp2.RequestHandler):
+        def get(self):
+            self.response.write(open('templates/' + filename).read())
+    return ServeFileImpl
 
-    def serve(self, fname):
-        self.send_responsecode_and_headers(200, (("Content-type", "text/html"),))
-        self.wfile.write(open('templates/' + fname, 'r').read())
 
-    def find_handler(self):
-        for route, handler in self.dispatch:
-            if route == self.path:
-                return handler
-        return None
-
-    def do_HEAD(self):
-        if self.find_handler():
-            self.send_responsecode_and_headers(200, (("Content-type", "text/html"),))
-        else:
-            self.send_responsecode_and_headers(404)
-
-    def do_GET(self):
-        handler = self.find_handler()
-        if handler:
-            try:
-                handler()
-            except IOError, e:
-                logging.exception("Ignoring IOError while handling %s", self.path)
-        else:
-            self.send_response(404)
-            self.end_headers()
-
-    def monitor_load_cell(self):
-        self.send_responsecode_and_headers(200, (("Content-type", "text/json"),))
-        self.wfile.write("[");
-        self.wfile.write(','.join('[%s, %f]' % rec for rec in self.load_cell.recent(1000)))
-        self.wfile.write("]");
-
+def LoadCellJson(load_cell):
+    class LoadCellHandler(webapp2.RequestHandler):
+        def get(self):
+            self.response.write("[");
+            self.response.write(','.join('[%s, %f]' % rec
+                                for rec in load_cell.recent(1000)))
+            self.response.write("]");
+    return LoadCellHandler
 
 def StartServer(port):
+    from paste import httpserver
     load_cell = LoadCellMonitor()
+    load_cell.daemon = True
     load_cell.start()
-    httpd = BaseHTTPServer.HTTPServer(('', port), lambda *args: NEEBre8Handler(load_cell, *args))
-    print "serving at http://%s:%i" % (socket.gethostname(), port)
-    try:
-        httpd.serve_forever(.2)
-    except KeyboardInterrupt:
-        load_cell.stop()
-        httpd.shutdown()
 
+    app = webapp2.WSGIApplication([
+        ('/', ServeFile('index.html')),
+        ('/load_cell', ServeFile('load_cell.html')),
+        ('/load_cell.json', LoadCellJson(load_cell))
+    ])
+    print "serving at http://%s:%i" % (socket.gethostname(), port)
+    httpserver.serve(app, host=socket.gethostname(), port=port)
 
 def main():
     import argparse
-
     parser = argparse.ArgumentParser(description="N.E.BRE-8 control server")
     parser.add_argument('--port', type=int, default=8000, help='Port to run on')
     args = parser.parse_args()

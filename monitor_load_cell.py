@@ -34,7 +34,7 @@ class LoadCellMonitor(threading.Thread):
 
     def run(self):
         while not self.shutdown:
-            val = -self.adc.readADCDifferential01(4096, 500)/1000.0
+            val = -self.adc.readADCDifferential01(4096, 64)/1000.0
             ts = time.time()
             self.buffer.append((ts, val))
 

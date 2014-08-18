@@ -3,8 +3,13 @@
 set -e
 
 function install_once {
-	sudo apt-get install python-smbus
-	sudo apt-get install i2c-tools
+	sudo apt-get install \
+    python-smbus python-pip i2c-tools \
+    libxml2 libcurl
+  sudo pip install --upgrade pip
+  sudo pip install --upgrade \
+    enum34 pycurl pyquery \
+    WebOb Paste webapp2
 }
 
 function initialize {
