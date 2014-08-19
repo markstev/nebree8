@@ -36,7 +36,7 @@ def StartServer(port):
         ('/load_cell.json', LoadCellJson(load_cell))
     ])
     print "serving at http://%s:%i" % (socket.gethostname(), port)
-    httpserver.serve(app, host=socket.gethostname(), port=port)
+    httpserver.serve(app, host="0.0.0.0", port=port)
 
 def main():
     import argparse

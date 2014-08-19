@@ -5,10 +5,10 @@ set -e
 function install_once {
 	sudo apt-get install \
     python-smbus python-pip i2c-tools \
-    libxml2 libcurl
+    libxml2 python-dev python-pycurl python-pyquery
   sudo pip install --upgrade pip
   sudo pip install --upgrade \
-    enum34 pycurl pyquery \
+    enum34 \
     WebOb Paste webapp2
 }
 
