@@ -6,9 +6,9 @@ import io_bank
 import sys
 import time
 
-dir_pin = 17
+dir_pin = 22
 pul_pin = 27
-en_pin = 22
+en_pin = 17
 
 #3.75 inches per revolution
 
@@ -30,24 +30,32 @@ class StepperMotor(object):
     self.dry_run = dry_run
     self.io = io_bank.IOBank()
     self.colliding_positive = False
+    self.colliding_negative = False
     def HitPositiveRail(channel):
       self.colliding_positive = True
-    self.io.AddCallback(io_bank.Inputs.LIMIT_SWITCH, gpio.FALLING,
+    def HitNegativeRail(channel):
+      self.colliding_negative = True
+    self.io.AddCallback(io_bank.Inputs.LIMIT_SWITCH_POS, gpio.FALLING,
         HitPositiveRail)
+    self.io.AddCallback(io_bank.Inputs.LIMIT_SWITCH_NEG, gpio.FALLING,
+        HitNegativeRail)
     #lambda x: self.HitPositiveRail)
 
 
-  def Move(self, steps, forward=1):
+  def Move(self, steps, forward=1, ramp_seconds=0):
     if self.dry_run:
       print "DRY RUN: Moving %d steps in direction: %d" % (steps, forward)
     gpio.output(pul_pin, 0)
     gpio.output(dir_pin, forward)
     for i in range(steps):
-      if not (self.colliding_positive and forward):
+      if (not ((self.colliding_positive and forward)
+               or (self.colliding_negative and not forward))):
         gpio.output(pul_pin, int(self.pulse_state))
         time.sleep(0.001)  # one millisecond
         self.pulse_state = not self.pulse_state
-      if not forward:
+      if forward:
+        self.colliding_negative = False
+      else:
         self.colliding_positive = False
     gpio.output(pul_pin, 0)
 
@@ -68,6 +76,11 @@ class RobotRail(object):
       print "At position: %f" % position
       time.sleep(2.0)
 
+  def CalibrateToZero(self):
+    steps = InchesToSteps(200)
+    self.motor.Move(steps, forward=True)
+    self.position = 0
+
   
 def main(args):
   parser = argparse.ArgumentParser(description='Move robot stepper motor.')
@@ -81,6 +94,8 @@ def main(args):
                       help='Whether to move motors')
   parser.add_argument('--positions', type=float, nargs="+", default=(),
                       help='List of positions to move the truck through')
+  parser.add_argument('--absolute', type=bool, nargs="?", default=False,
+                      help='Whether calibrate position')
   args = parser.parse_args()
   print args
   # For the NEMA 14 12v 350mA (#324) stepper motors from AdaFruit:
@@ -90,6 +105,8 @@ def main(args):
   motor = StepperMotor(args.dry_run)
   rail = RobotRail(motor)
   if args.positions:
+    if args.absolute:
+      rail.CalibrateToZero()
     rail.FillPositions(args.positions)
     gpio.cleanup()
     return
