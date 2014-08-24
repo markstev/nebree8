@@ -6,23 +6,23 @@ import io_bank
 import sys
 import time
 
-dir_pin = 22
-pul_pin = 27
-en_pin = 17
+# dir_pin = 7
+# pul_pin = 8
+# en_pin = 25
 
 #3.75 inches per revolution
 
-output_pins = (
-    dir_pin,
-    pul_pin,
-    en_pin)
+# output_pins = (
+#     dir_pin,
+#     pul_pin,
+#     en_pin)
 
-def Setup():
-  gpio.setmode(gpio.BCM)
-  gpio.setwarnings(False)
-  for pin in output_pins:
-    gpio.setup(pin, gpio.OUT)
-  gpio.output(en_pin, 0)
+# def Setup():
+#   gpio.setmode(gpio.BCM)
+#   gpio.setwarnings(False)
+#   for pin in output_pins:
+#     gpio.setup(pin, gpio.OUT)
+# gpio.output(en_pin, 0)
 
 class StepperMotor(object):
   def __init__(self, dry_run=False):
@@ -39,25 +39,28 @@ class StepperMotor(object):
         HitPositiveRail)
     self.io.AddCallback(io_bank.Inputs.LIMIT_SWITCH_NEG, gpio.FALLING,
         HitNegativeRail)
-    #lambda x: self.HitPositiveRail)
 
 
   def Move(self, steps, forward=1, ramp_seconds=0):
     if self.dry_run:
       print "DRY RUN: Moving %d steps in direction: %d" % (steps, forward)
-    gpio.output(pul_pin, 0)
-    gpio.output(dir_pin, forward)
+    self.io.WriteOutput(io_bank.Outputs.STEPPER_PULSE, 0)
+    self.io.WriteOutput(io_bank.Outputs.STEPPER_DIR, forward)
+    #gpio.output(pul_pin, 0)
+    #gpio.output(dir_pin, forward)
     for i in range(steps):
       if (not ((self.colliding_positive and forward)
                or (self.colliding_negative and not forward))):
-        gpio.output(pul_pin, int(self.pulse_state))
+        #print self.pulse_state
+        self.io.WriteOutput(io_bank.Outputs.STEPPER_PULSE, int(self.pulse_state))
+        #gpio.output(pul_pin, int(self.pulse_state))
         time.sleep(0.001)  # one millisecond
         self.pulse_state = not self.pulse_state
       if forward:
         self.colliding_negative = False
       else:
         self.colliding_positive = False
-    gpio.output(pul_pin, 0)
+    self.io.WriteOutput(io_bank.Outputs.STEPPER_PULSE, 0)
 
 def InchesToSteps(inches):
   return int(inches / 3.75 * 800)
@@ -101,7 +104,7 @@ def main(args):
   # For the NEMA 14 12v 350mA (#324) stepper motors from AdaFruit:
   # http://www.adafruit.com/products/324
   # Driving it with 12v using a delay of 1 microsecond.
-  Setup()
+  #Setup()
   motor = StepperMotor(args.dry_run)
   rail = RobotRail(motor)
   if args.positions:

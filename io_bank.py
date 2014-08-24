@@ -15,27 +15,29 @@ def DebugPrint(*args):
     #time.sleep(0.01)
 
 class Outputs(enum.Enum):
-  STEPPER_DIR = 22
-  STEPPER_PULSE = 27
-  STEPPER_ENABLE = 17
+  STEPPER_DIR = 7
+  STEPPER_PULSE = 8
+  STEPPER_ENABLE = 25
 
-  #SHIFT_REG_ENABLE = 8  # mid
-  SHIFT_REG_CLOCK = 8
-  SHIFT_REG_RCLOCK = 25
-  SHIFT_REG_SERIAL = 7
+  # SHIFT_REG_CLOCK = 8
+  # SHIFT_REG_RCLOCK = 25
+  # SHIFT_REG_SERIAL = 7
+  SHIFT_REG_CLOCK = 9
+  SHIFT_REG_RCLOCK = 11
+  SHIFT_REG_SERIAL = 10
 
   X_6 = 1000
   COMPRESSOR = 1001
   X_2 = 1002
-  VALVE_0_WIRED = 1003
-  VALVE_1_WIRED = 1004
+  VALVE_0_WIRED = 1006
+  VALVE_1_WIRED = 1007
   X_5 = 1005
-  X_0 = 1006
-  X_7 = 1007
+  X_0 = 1003
+  X_7 = 1004
 
 class Inputs(enum.Enum):
-  LIMIT_SWITCH_POS = 3
-  LIMIT_SWITCH_NEG = 4
+  LIMIT_SWITCH_POS = 23
+  LIMIT_SWITCH_NEG = 24
   
 _SHIFT_REG_SLEEP_TIME = 0.1 # 1 ms -> 1khz
 _SHIFT_REG_ADDRESS_OFFSET = 1000
@@ -70,15 +72,18 @@ class IOBank(object):
       shift_register_index = output_enum.value - _SHIFT_REG_ADDRESS_OFFSET
       self.current_shifted_byte[shift_register_index] = value
       self.Shift(self.current_shifted_byte)
+      self.Shift(self.current_shifted_byte)
+      self.Shift(self.current_shifted_byte)
 
   def Shift(self, byte): 
-    SLEEP_TIME = 0.000
+    SLEEP_TIME = 0.00001
     byte = list(byte)
     byte.reverse()
     DebugPrint("Writing byte ", byte, " into shift register.")
+    self.WriteOutput(Outputs.SHIFT_REG_RCLOCK, gpio.LOW)
     for bitnum, bit in enumerate(byte):
       foodbit = bit
-      DebugPrint("food piece ", 7 - bitnum, " into mouth with this piece of food ", foodbit, " and chew")
+      DebugPrint("shift bit #", 7 - bitnum, " into register with bit ", foodbit)
       self.WriteOutput(Outputs.SHIFT_REG_SERIAL, foodbit)
       time.sleep(SLEEP_TIME)
       self.WriteOutput(Outputs.SHIFT_REG_CLOCK, gpio.LOW)
@@ -86,8 +91,9 @@ class IOBank(object):
       self.WriteOutput(Outputs.SHIFT_REG_CLOCK, gpio.HIGH)
       time.sleep(SLEEP_TIME)
     self.WriteOutput(Outputs.SHIFT_REG_CLOCK, gpio.LOW)  # Reset to a safe state.
-    DebugPrint("and swallow")
+    DebugPrint("and lock")
     self.WriteOutput(Outputs.SHIFT_REG_RCLOCK, gpio.LOW)
     #GPIO.output(gpiomap[swallow], GPIO.LOW)
     self.WriteOutput(Outputs.SHIFT_REG_RCLOCK, gpio.HIGH)
+    self.WriteOutput(Outputs.SHIFT_REG_RCLOCK, gpio.LOW)
     #GPIO.output(gpiomap[swallow], GPIO.HIGH)
