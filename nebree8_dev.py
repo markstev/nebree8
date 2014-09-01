@@ -24,11 +24,27 @@ def main(args):
                       help='Value to set on the pin.')
   parser.add_argument('--wait_for_falling_io', type=int, nargs="?", default=0,
                       help='IO pin to wait for a falling edge on')
+  parser.add_argument('--valve_motor1_direction', type=int, nargs="?", default=0,
+                      help='Direction to move valve motor1')
   args = parser.parse_args()
 
   if args.set_io:
     io = io_bank.IOBank()
     io.WriteOutput(io_bank.Outputs(args.set_io), args.set_io_value)
+  if args.valve_motor1_direction:
+    io = io_bank.IOBank()
+    io.WriteOutput(io_bank.Outputs.COMPRESSOR, 1)
+    if args.valve_motor1_direction > 0:
+      io.WriteOutput(io_bank.Outputs(io_bank.Outputs.MOTOR_UP_B), 0)
+      io.WriteOutput(io_bank.Outputs(io_bank.Outputs.MOTOR_DOWN_B1), 0)
+      io.WriteOutput(io_bank.Outputs(io_bank.Outputs.MOTOR_UP_A), 1)
+      io.WriteOutput(io_bank.Outputs(io_bank.Outputs.MOTOR_DOWN_A1), 1)
+    else:
+      io.WriteOutput(io_bank.Outputs(io_bank.Outputs.MOTOR_UP_A), 0)
+      io.WriteOutput(io_bank.Outputs(io_bank.Outputs.MOTOR_DOWN_A1), 0)
+      io.WriteOutput(io_bank.Outputs(io_bank.Outputs.MOTOR_UP_B), 1)
+      io.WriteOutput(io_bank.Outputs(io_bank.Outputs.MOTOR_DOWN_B1), 1)
+      print "not ready yet"
   if args.wait_for_falling_io:
     io = io_bank.IOBank()
     def PrintCallback(channel):

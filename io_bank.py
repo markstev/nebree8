@@ -26,14 +26,17 @@ class Outputs(enum.Enum):
   SHIFT_REG_RCLOCK = 11
   SHIFT_REG_SERIAL = 10
 
+  MOTOR_UP_A = 27
+  MOTOR_UP_B = 22
+
   X_6 = 1000
   COMPRESSOR = 1001
   X_2 = 1002
-  VALVE_0_WIRED = 1006
-  VALVE_1_WIRED = 1007
-  X_5 = 1005
-  X_0 = 1003
-  X_7 = 1004
+  X_3 = 1003
+  X_4 = 1004
+  MOTOR_DOWN_A1 = 1005
+  MOTOR_DOWN_B1 = 1006
+  X_7 = 1007
 
 class Inputs(enum.Enum):
   LIMIT_SWITCH_POS = 23
@@ -52,7 +55,7 @@ class IOBank(object):
     for pin in Inputs:
       gpio.setup(pin.value, gpio.IN, pull_up_down=gpio.PUD_UP)
     self.current_shifted_byte = [0] * 8
-    self.WriteOutput(Outputs.COMPRESSOR, 0)
+    #self.WriteOutput(Outputs.COMPRESSOR, 0)
 
   def ReadInput(self, input_enum):
     return gpio.input(input_enum.value)
@@ -76,7 +79,7 @@ class IOBank(object):
       self.Shift(self.current_shifted_byte)
 
   def Shift(self, byte): 
-    SLEEP_TIME = 0.00001
+    SLEEP_TIME = 0.0001
     byte = list(byte)
     byte.reverse()
     DebugPrint("Writing byte ", byte, " into shift register.")
@@ -84,9 +87,9 @@ class IOBank(object):
     for bitnum, bit in enumerate(byte):
       foodbit = bit
       DebugPrint("shift bit #", 7 - bitnum, " into register with bit ", foodbit)
-      self.WriteOutput(Outputs.SHIFT_REG_SERIAL, foodbit)
-      time.sleep(SLEEP_TIME)
       self.WriteOutput(Outputs.SHIFT_REG_CLOCK, gpio.LOW)
+      time.sleep(SLEEP_TIME)
+      self.WriteOutput(Outputs.SHIFT_REG_SERIAL, foodbit)
       time.sleep(SLEEP_TIME)
       self.WriteOutput(Outputs.SHIFT_REG_CLOCK, gpio.HIGH)
       time.sleep(SLEEP_TIME)
