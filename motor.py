@@ -25,10 +25,12 @@ import time
 # gpio.output(en_pin, 0)
 
 class StepperMotor(object):
-  def __init__(self, dry_run=False):
+  def __init__(self, dry_run=False, io=None):
     self.pulse_state = False
     self.dry_run = dry_run
-    self.io = io_bank.IOBank()
+    if not io:
+      io = io_bank.IOBank()
+    self.io = io
     self.colliding_positive = False
     self.colliding_negative = False
     def HitPositiveRail(channel):
