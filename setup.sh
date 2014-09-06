@@ -8,8 +8,8 @@ function install_once {
     libxml2 python-dev python-pycurl python-pyquery
   sudo pip install --upgrade pip
   sudo pip install --upgrade \
-    enum34 \
-    WebOb Paste webapp2
+    RPi.GPIO \
+    enum34 WebOb Paste webapp2
 }
 
 function initialize {

@@ -1,6 +1,6 @@
 import io_bank
 import robot
-import monitor_load_cell
+from parts.load_cell import LoadCellMonitor
 import motor
 
 
@@ -10,6 +10,7 @@ class PhysicalRobot(Robot):
     self.io = io_bank.IOBank()
     motor = StepperMotor(io=self.io)  # Not a dry run
     self.rail = motor.RobotRail(motor)
+    self.load_cell = LoadCellMonitor()
 
   def CalibrateToZero(self):
     self.rail.CalibrateToZero()
