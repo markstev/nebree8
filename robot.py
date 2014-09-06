@@ -2,37 +2,39 @@
 # Nebree8 robot.
 
 import time
+from parts.load_cell import FakeLoadCellMonitor
 
 class Robot(object):
   def CalibrateToZero(self):
     """Moves the truck to position zero, relying on the touch sensor to stop it.
     """
-    pass
+    raise NotImplementedError()
 
   def MoveToPosition(self, position_in_inches):
     """Moves the truck to the requested absolute position.
     """
-    pass
+    raise NotImplementedError()
 
   def Fill(self, weight_in_grams):
     """Fills the cup at the current position with the given weight.
     """
-    pass
+    raise NotImplementedError()
 
   def ActivateCompressor(self):
     """Turns on the compressor.
     """
-    pass
+    raise NotImplementedError()
 
   def DeactivateCompressor(self):
     """Turns off the compressor.
     """
-    pass
+    raise NotImplementedError()
 
 
 class FakeRobot(Robot):
   def __init__(self):
     self.position = 30.0
+    self.load_cell = FakeLoadCellMonitor()
 
   def CalibrateToZero(self):
     self._FakeMove(0)
@@ -41,7 +43,9 @@ class FakeRobot(Robot):
     self._FakeMove(0)
     
   def Fill(self, weight_in_grams):
+    self.load_cell.load_per_second = .05  # estimated flow rate
     time.sleep(weight_in_grams / 20.0)
+    self.load_cell.load_per_second = 0
 
   def ActivateCompressor(self):
     return
