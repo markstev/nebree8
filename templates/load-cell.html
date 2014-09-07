@@ -1,0 +1,152 @@
+<polymer-element name="load-cell">
+  <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <style>
+    /* tell the SVG path to be a thin blue line without any area fill */
+    .raw-line {
+      stroke: lightgray;
+      stroke-width: 1;
+      fill: none;
+    }
+
+    .avg-line {
+      stroke: blue;
+      stroke-width: 1;
+      fill: none;
+    }
+    
+    .axis {
+      shape-rendering: crispEdges;
+    }
+
+    .x.axis line {
+      stroke: lightgrey;
+    }
+
+    .x.axis .minor {
+      stroke-opacity: .5;
+    }
+
+    .x.axis path {
+      display: none;
+    }
+
+    .y.axis line, .y.axis path {
+      fill: none;
+      stroke: #000;
+    }
+    .graph-container {
+      width: 1000px;
+      height: 500px;
+    }
+  </style>
+  <template>
+    <div class="graph-container">
+      <div id="graph" class="aGraph" style="position:absolute;top:0px;left:0; float:left;"></div>
+    </div>
+
+      <div class="stat">Average: <span id="avg"></span></div>
+      <div class="stat">Standard Deviation: <span id="stddev"></span></div>
+  </template>
+
+<script>
+  Polymer({
+    ready: function() {
+    var data = [[0, 0], [0, 0]];
+    var graph;
+    var line;
+    var x;
+    var y;
+    var avg_elt = this.$.avg; // document.getElementById('avg');
+    var std_dev_elt = this.$.stddev; // document.getElementById('stddev');
+
+    /* implementation heavily influenced by http://bl.ocks.org/1166403 */
+    
+    // define dimensions of graph
+    var m = [80, 80, 80, 80]; // margins
+    var w = 1000 - m[1] - m[3]; // width
+    var h = 400 - m[0] - m[2]; // height
+    
+    // create a simple data array that we'll plot with a line (this array represents only the Y values, X will just be the index location)
+    // var data = read in using /load_cell.json
+
+    function get_x(tup) { return tup[0]; }
+    function get_y(tup) { return tup[1]; }
+
+    var x = d3.scale.linear().domain(d3.extent(data.map(get_x))).range([0, w]);
+    var y = d3.scale.linear().domain(d3.extent(data.map(get_y))).range([h, 0]);
+      // automatically determining max range can work something like this
+      // var y = d3.scale.linear().domain([0, d3.max(data)]).range([h, 0]);
+
+    // create a line function that can convert data[] into x and y points
+    line = d3.svg.line()
+      // assign the X function to plot our line as we wish
+      .x(function(d,i) { return x(d[0]); })
+      .y(function(d) { return y(d[1]); })
+
+      // Add an SVG element with the desired dimensions and margin.
+      var graph = d3.select(this.$.graph).append("svg:svg")
+            .attr("width", w + m[1] + m[3])
+            .attr("height", h + m[0] + m[2])
+          .append("svg:g")
+            .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
+
+      // create yAxis
+      var xAxis = d3.svg.axis().scale(x).tickSize(-h).tickSubdivide(true);
+      // Add the x-axis.
+      graph.append("svg:g")
+            .attr("class", "x-axis")
+            .attr("transform", "translate(0," + h + ")")
+            .call(xAxis);
+
+
+      // create left yAxis
+      var yAxisLeft = d3.svg.axis().scale(y).ticks(4).orient("left");
+      // Add the y-axis to the left
+      graph.select("g")
+            .attr("class", "y-axis")
+            .attr("transform", "translate(-25,0)")
+            .call(yAxisLeft);
+      
+      graph.append("svg:path").attr("class", "raw-line");
+      graph.append("svg:path").attr("class", "avg-line");
+      function refreshData() {
+        d3.json("/load_cell.json", function(error, json) {
+          if (error) return console.warn(error);
+          console.log("Read " + json.length + " records.");
+          data = json;
+          var avg_data = data.map(function (_, i) {
+            var s = data.slice(i, i + 50);
+            return [data[i][0], d3.sum(s.map(get_y)) / s.length];
+          });
+          if (data.length > 50) {
+            var s = data.slice(data.length - 50, data.length);
+            var avg = d3.sum(s.map(get_y)) / s.length;
+            var stddev = Math.sqrt(
+                d3.sum(s.map(function(r) { return Math.pow(r[1] - avg, 2); }))
+               / (s.length - 1));
+             avg_elt.innerHTML = avg
+             std_dev_elt.innerHTML = stddev;
+          }
+          x = d3.scale.linear().domain(d3.extent(data.map(get_x))).range([0, w]);
+          y = d3.scale.linear().domain(d3.extent(data.map(get_y))).range([h, 0]);
+          graph.select(".y-axis")
+                .attr("transform", "translate(-25,0)")
+                .call(yAxisLeft);
+          graph.select(".x-axis")
+                .attr("transform", "translate(0," + h + ")")
+                .call(xAxis);
+          graph.select(".raw-line")
+            .attr("d", line(data));
+          graph.select(".avg-line")
+            .attr("d", line(avg_data));
+        });
+      }
+
+      function refreshContinuously() {
+        window.setTimeout(function() { refreshData(); refreshContinuously(); }, 200);
+      }
+      refreshContinuously();
+    }
+  });
+</script>
+</polymer-element>

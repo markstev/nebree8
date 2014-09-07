@@ -1,0 +1,36 @@
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/core-ajax/core-ajax.html">
+
+<polymer-element name="command-button" comm="{{comm}}" textValue="{{textValue}}">
+  <template>
+    <style>
+    </style>
+    <paper-button
+      label="{{comm}}"
+      on-tap="{{buttonClick}}"
+      raisedButton>
+    </paper-button>
+
+    <core-ajax id="command"
+      auto=false
+      url="../robot-control"
+      params='{"command":"{{comm}}", "text":"{{textValue}}"}'
+      handleAs="json"
+      method="POST"
+      on-core-response="{{handleResponse}}">
+    </core-ajax>
+  </template>
+  <script>
+  Polymer({
+    publish: {
+      comm: {
+        value: "default",
+        reflect: true
+      }
+    },
+    buttonClick: function(event, detail, sender) {
+      this.$.command.go();
+    }
+  });
+  </script>
+</polymer-element>

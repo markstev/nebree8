@@ -1,0 +1,30 @@
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="command-button.html">
+
+<polymer-element name="control-panel" comm="{{comm}}">
+  <template>
+    <style>
+    </style>
+    <div layout horizontal>
+      <command-button id="commandButton" comm="{{comm}}"></command-button>
+      <paper-input id="textInput" on-change="{{inputChange}}"></paper-input>
+    </div>
+  </template>
+  <script>
+  //document.querySelector('paper-input').addEventListener('change', function(event) {
+  //  alert(event.target.value);
+  //});
+  Polymer({
+    publish: {
+      comm: {
+        value: "default",
+        reflect: true
+      }
+    },
+    inputChange: function(event, detail, sender) {
+      this.$.commandButton.textValue = this.$.textInput.value;
+    }
+  });
+  </script>
+</polymer-element>
+
