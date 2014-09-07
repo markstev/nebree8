@@ -6,12 +6,15 @@ import time
 import threading
 
 from Adafruit_ADS1x15 import ADS1x15
-from collections import deque
+from collections import deque, namedtuple
 
 SAMPLES_PER_SECOND=256
 ADS1115 = 1
 
+Summary = namedtuple('Summary', ['records', 'mean', 'stddev', 'timestamp'])
+
 class LoadCellMonitor(threading.Thread):
+    """Continuously monitors and logs weight sensor readings."""
     def __init__(self, bufsize=10000, adc=None):
         super(LoadCellMonitor, self).__init__()
         self.buffer = deque(maxlen=bufsize)
@@ -24,17 +27,25 @@ class LoadCellMonitor(threading.Thread):
         self.daemon = True
         self.start()
 
-    def recent(self, n):
+    def recent(self, n=0, secs=0):
         """Return the last n readings as (time, value) tuples."""
-        return list(deque(self.buffer, n))
+        if n <= 0 and secs <= 0: return []
+        if n > 0:
+          return list(deque(self.buffer, n))
+        n = SAMPLES_PER_SECOND * secs * 2
+        recs = list(deque(self.buffer, n))
+        threshold = time.time() - secs
+        return [(ts, v) for ts, v in recs if ts > threshold]
 
-    def recent_summary(self, n):
+    def recent_summary(self, n=0, secs=0):
         """Return the mean and standard deviation of the last n readings."""
-        recs = self.recent(n)
+        recs = self.recent(n, secs)
         n = len(recs)
+        if n == 0:
+          return Summary([], 0, 0, time.time())
         mean = sum(v for t, v in recs) / n
         stddev = math.sqrt(sum((v - mean)**2 for t, v in recs) / (n - 1))
-        return mean, stddev
+        return Summary(recs, mean, stddev, max(ts for ts, v in recs))
 
     def stop(self):
         self.shutdown = True
