@@ -1,8 +1,42 @@
 <html>
 <head>
   <title>N E BRE 8 - Homepage</title>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <script src="../bower_components/platform/platform.js"></script>
+  <link rel="import" href="../bower_components/font-roboto/roboto.html">
+  <link rel="import" href="command-button.html">
+  <link rel="import" href="control-panel.html">
+  <link rel="import" href="load-cell.html">
+
+  <style>
+    html,body {
+      height: 100%;
+      margin: 0;
+      background-color: #E5E5E5;
+      font-family: 'RobotoDraft', sans-serif;
+    }
+
+    .container {
+      height: 600px;
+    }
+    .graph-container {
+      width: 1000px;
+      height: 500px;
+    }
+  </style>
 </head>
 <body>
-Stub.
+  <h1>NE Bre 8 Dev Console</h1>
+  <div class="container" layout vertical center>
+    <div layout vertical justified>
+      <div layout horizontal><command-button comm="calibrate"></command-button></div>
+      <control-panel comm="move to position (inches)"></control-panel>
+      <control-panel comm="fill (grams)"></control-panel>
+      <command-button comm="toggle compressor"></command-button>
+    </div>
+  </div>
+      <div layout vertical center class="graph-container">
+        <load-cell></load-cell>
+      </div>
 </body>
 </html>

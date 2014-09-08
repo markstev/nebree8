@@ -54,6 +54,22 @@ class InspectQueue(webapp2.RequestHandler):
         self.response.write(GetTemplate('queue.html').format(content=content))
 
 
+class StaticFileHandler(webapp2.RequestHandler):
+    def get(self):
+        self.response.write(open(self.ToRelativePath(self.request.path)).read())
+    def ToRelativePath(self, path):
+        if (len(path) > 0 and path[0] == "/"):
+            return path[1:]
+
+
+class RobotControlHandler(webapp2.RequestHandler):
+    def post(self):
+        print self.request.get("command")
+        print self.request.get("text")
+    def get(self):
+        print "Shouldn't call get!"
+
+
 def StartServer(port):
     from paste import httpserver
 
@@ -63,6 +79,9 @@ def StartServer(port):
         ('/load_cell', ServeFile('load_cell.html')),
         ('/load_cell.json', LoadCellJson),
         ('/queue', InspectQueue),
+        ('/robot-control', RobotControlHandler),
+        ('/templates/.*', StaticFileHandler),
+        ('/bower_components/.*', StaticFileHandler)
     ])
     print "serving at http://%s:%i" % (socket.gethostname(), port)
     httpserver.serve(app, host="0.0.0.0", port=port)

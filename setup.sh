@@ -31,8 +31,15 @@ function test_config {
   i2cdetect -y 1
 }
 
+function install_polymer {
+  sudo apt-get install nodejs
+  sudo npm install -g bower
+  #sudo bower init
+}
+
 function all {
   install_once
+  install_polymer
   initialize
   test_config
 }
