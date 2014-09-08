@@ -22,7 +22,7 @@ class PhysicalRobot(Robot):
     pass
 
   def ActivateCompressor(self):
-    io.WriteOutput(io_bank.Outputs.COMPRESSOR, 0)
+    self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 0)
 
   def DeactivateCompressor(self):
-    io.WriteOutput(io_bank.Outputs.COMPRESSOR, 1)
+    self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 1)
