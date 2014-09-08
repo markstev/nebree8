@@ -58,7 +58,22 @@ class InspectQueue(webapp2.RequestHandler):
                 content.append(name)
                 for prop in props.items():
                   content.append('\t%s: %s' % prop)
-        self.response.write(GetTemplate('queue.html').format(content='\n'.join(content)))
+        self.response.write(GetTemplate('queue.html').format(
+          exception=controller.last_exception, content='\n'.join(content)))
+
+
+class RetryQueue(webapp2.RequestHandler):
+  def post(self):
+    if controller.last_exception:
+      controller.Retry()
+    self.response.write("Restarted queue")
+
+
+class ClearQueue(webapp2.RequestHandler):
+  def post(self):
+    if controller.last_exception:
+      controller.ClearAndResume()
+    self.response.write("Cleared queue")
 
 
 class StaticFileHandler(webapp2.RequestHandler):
@@ -112,6 +127,8 @@ def StartServer(port):
         ('/load_cell', ServeFile('load_cell.html')),
         ('/load_cell.json', LoadCellJson),
         ('/queue', InspectQueue),
+        ('/queue-retry', RetryQueue),
+        ('/queue-clear', ClearQueue),
         ('/robot-control', RobotControlHandler),
         ('/templates/.*', StaticFileHandler),
         ('/bower_components/.*', StaticFileHandler)

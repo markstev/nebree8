@@ -3,7 +3,7 @@
 import logging
 import time
 
-from actions.action import Action
+from actions.action import Action, ActionException
 
 
 VALVE_ACTUATION_DELAY_SECS = 0.3
@@ -12,10 +12,10 @@ MAX_TARE_STDDEV = .03
 TARE_TIMEOUT_SECS = 2
 MAX_METER_SECS = 5
 
-class TareTimeout(Exception):
+class TareTimeout(ActionException):
     """Thrown when attempt to tare times out"""
 
-class MeterTimeout(Exception):
+class MeterTimeout(ActionException):
     """Throw when metering takes too long after tare."""
     def __init__(self, tare, target_ts, recent_readings,
             complete_readings):

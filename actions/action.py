@@ -9,3 +9,6 @@ class Action(object):
     def inspect(self):
         """Returns a description of this action."""
         return (self.__class__.__name__, self.__dict__)
+
+class ActionException(Exception):
+    pass
