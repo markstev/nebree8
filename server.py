@@ -46,12 +46,16 @@ class InspectQueue(webapp2.RequestHandler):
     def get(self):
         """Displays the state of the action queue."""
         actions = controller.InspectQueue()
+        content = []
         if not actions:
-            content = "Queue is empty"
+            content.append("Queue is empty")
         else:
-            content = '\n'.join(
-              '%s\n\t%s' % a.inspect() for a in actions)
-        self.response.write(GetTemplate('queue.html').format(content=content))
+            for action in actions:
+                name, props = action.inspect()
+                content.append(name)
+                for prop in props.items():
+                  content.append('\t%s: %s' % prop)
+        self.response.write(GetTemplate('queue.html').format(content='\n'.join(content)))
 
 
 class StaticFileHandler(webapp2.RequestHandler):

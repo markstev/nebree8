@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
+import time
 import threading
 import collections
+import logging
+import os
 
 class Controller:
   def __init__(self, robot):
@@ -19,7 +22,11 @@ class Controller:
       self.queued_sem.acquire() # Ensure there are items to process.
       with self.queue_lock:
         self.current_action = self.queue.popleft()
-      self.current_action(self.robot)
+      try:
+        self.current_action(self.robot)
+      except Exception:
+        threading.Thread(target=self.KillProcess).start()
+        raise
 
   def EnqueueGroup(self, action_group):
     with self.queue_lock:
@@ -32,3 +39,7 @@ class Controller:
     with self.queue_lock:
       return (([self.current_action] if self.current_action else []) +
           list(self.queue))
+
+  def KillProcess(self):
+    time.sleep(1)
+    os._exit(1)
