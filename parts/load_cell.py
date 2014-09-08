@@ -5,7 +5,6 @@ import random
 import time
 import threading
 
-from Adafruit_ADS1x15 import ADS1x15
 from collections import deque, namedtuple
 
 SAMPLES_PER_SECOND=256
@@ -18,31 +17,37 @@ class LoadCellMonitor(threading.Thread):
     def __init__(self, bufsize=10000, adc=None):
         super(LoadCellMonitor, self).__init__()
         self.buffer = deque(maxlen=bufsize)
-        try:
-          self.adc = ADS1x15(ic=ADS1115) if not adc else adc
-        except IOError, e:
-          print "Failed to open i2c device -- have you run ./setup.py initialize?\n"
-          raise
+        if not adc:
+          try:
+              from Adafruit_ADS1x15 import ADS1x15
+              self.adc = ADS1x15(ic=ADS1115)
+          except IOError:
+              print ("Failed to open i2c device -- have you run ./setup.py " +
+                      "initialize?\n")
+              raise
+        else:
+          self.adc = adc
         self.shutdown = False
         self.daemon = True
         self.start()
 
     def recent(self, n=0, secs=0):
         """Return the last n readings as (time, value) tuples."""
-        if n <= 0 and secs <= 0: return []
+        if n <= 0 and secs <= 0:
+            return []
         if n > 0:
-          return list(deque(self.buffer, n))
+            return list(deque(self.buffer, n))
         n = SAMPLES_PER_SECOND * secs * 2
         recs = list(deque(self.buffer, n))
         threshold = time.time() - secs
         return [(ts, v) for ts, v in recs if ts > threshold]
 
     def recent_summary(self, n=0, secs=0):
-        """Return the mean and standard deviation of the last n readings."""
+        """Return a Summary of the last n readings."""
         recs = self.recent(n, secs)
         n = len(recs)
         if n == 0:
-          return Summary([], 0, 0, time.time())
+            return Summary([], 0, 0, time.time())
         mean = sum(v for t, v in recs) / n
         stddev = math.sqrt(sum((v - mean)**2 for t, v in recs) / (n - 1))
         return Summary(recs, mean, stddev, max(ts for ts, v in recs))
@@ -81,14 +86,12 @@ class FakeLoadCellMonitor(LoadCellMonitor):
 
 def main():
   from math import sqrt
-  N = 100000
+  monitor = FakeLoadCellMonitor(bufsize=100000)
   while True:
-    monitor = FakeLoadCellMonitor(bufsize=N)
     time.sleep(1)
-    monitor.stop()
-    n = len(monitor.recent(N))
-    mean, stddev = monitor.recent_summary(N)
-    print "n=%i mean=%f stddev=%f" % (n, mean, stddev)
+    recent = monitor.recent_summary(secs=1)
+    n = len(recent.records)
+    print "n=%i mean=%f stddev=%f" % (n, recent.mean, recent.stddev)
 
 
 

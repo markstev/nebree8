@@ -29,7 +29,7 @@ class MeterTimeout(Exception):
                 (MAX_METER_SECS, self.tare, self.recent_readings))
 
 
-def __tare(robot):
+def _tare(robot):
     """Waits for load cell readings to stabilize.
 
     returns: load_cell.Summary
@@ -47,7 +47,7 @@ def __tare(robot):
                     MAX_TARE_STDDEV, TARE_TIMEOUT_SECS, tare))
     return tare
 
-def __predict_fill_completion(summary, target_reading):
+def _predict_fill_completion(summary, target_reading):
     """Predicts when the ADC reading will hit the target value based on the last
     100ms of readings.
 
@@ -65,10 +65,10 @@ class Meter(Action):
         self.valve_to_actuate = valve_to_actuate
         self.oz_to_meter = oz_to_meter
 
-    def __callable__(self, robot):
+    def __call__(self, robot):
         if self.oz_to_meter == 0:
             logging.warning("oz_to_meter was zero, returning early.")
-        tare = __tare(robot)
+        self.tare = tare = _tare(robot)
         target_reading = self.oz_to_meter / ADC_VALUES_TO_OZ * tare.mean
         summary = tare
         target_ts = tare.timestamp + MAX_METER_SECS
@@ -76,13 +76,13 @@ class Meter(Action):
         while target_ts - VALVE_ACTUATION_DELAY_SECS > time.time():
             if time.time() > tare.timestamp + MAX_METER_SECS:
                 raise MeterTimeout(tare=tare, target_ts=target_ts,
-                        recent=summary,
-                        readings=robot.load_cell.recent_summary(secs=MAX_METER_SECS))
+                        recent_readings=summary,
+                        complete_readings=robot.load_cell.recent_summary(secs=MAX_METER_SECS))
             time.sleep(.05)
             summary = robot.load_cell.recent_summary(secs=.1)
             # Log when readings actually start increasing.
             if summary.mean > tare.mean + tare.stddev * 2:
                 logging.info("Detected increase in weight after %ss: %s -> %s",
                         time.time() - tare.timestamp, tare, summary)
-            target_ts = __predict_fill_completion(summary, target_reading)
+            target_ts = _predict_fill_completion(summary, target_reading)
         #TODO(sagarmittal): Actuate valve_to_actuate

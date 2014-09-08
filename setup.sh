@@ -10,6 +10,7 @@ function install_once {
   sudo pip install --upgrade \
     RPi.GPIO \
     enum34 WebOb Paste webapp2
+  install_polymer
 }
 
 function initialize {
@@ -34,7 +35,7 @@ function test_config {
 function install_polymer {
   sudo apt-get install nodejs
   sudo npm install -g bower
-  #sudo bower init
+  bower update
 }
 
 function all {

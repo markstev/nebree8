@@ -6,11 +6,56 @@ import logging
 import re
 import socket
 
+from controller import Controller
+from actions.meter import Meter
+from actions.home import Home
+
+robot = None
+controller = None
+
+
+def GetTemplate(filename):
+    return open('templates/' + filename).read()
+
+
 def ServeFile(filename):
     class ServeFileImpl(webapp2.RequestHandler):
         def get(self):
-            self.response.write(open('templates/' + filename).read())
+            self.response.write(GetTemplate(filename))
     return ServeFileImpl
+
+
+class LoadCellJson(webapp2.RequestHandler):
+    def get(self):
+        self.response.write("[")
+        self.response.write(','.join('[%s, %f]' % rec
+                            for rec in robot.load_cell.recent(1000)))
+        self.response.write("]")
+
+
+class MakeTestDrink(webapp2.RequestHandler):
+    def get(self):  # TODO: Switch to post.
+        controller.EnqueueGroup([
+            Home(),
+            Meter(valve_to_actuate=0, oz_to_meter=1),
+        ])
+        self.response.write("Queued.")
+
+
+class InspectQueue(webapp2.RequestHandler):
+    def get(self):
+        """Displays the state of the action queue."""
+        actions = controller.InspectQueue()
+        content = []
+        if not actions:
+            content.append("Queue is empty")
+        else:
+            for action in actions:
+                name, props = action.inspect()
+                content.append(name)
+                for prop in props.items():
+                  content.append('\t%s: %s' % prop)
+        self.response.write(GetTemplate('queue.html').format(content='\n'.join(content)))
 
 
 class StaticFileHandler(webapp2.RequestHandler):
@@ -29,22 +74,15 @@ class RobotControlHandler(webapp2.RequestHandler):
         print "Shouldn't call get!"
 
 
-def LoadCellJson(load_cell):
-    class LoadCellHandler(webapp2.RequestHandler):
-        def get(self):
-            self.response.write("[");
-            self.response.write(','.join('[%s, %f]' % rec
-                                for rec in load_cell.recent(1000)))
-            self.response.write("]");
-    return LoadCellHandler
-
-def StartServer(port, robot):
+def StartServer(port):
     from paste import httpserver
 
     app = webapp2.WSGIApplication([
         ('/', ServeFile('index.html')),
+        ('/test_drink', MakeTestDrink),
         ('/load_cell', ServeFile('load_cell.html')),
-        ('/load_cell.json', LoadCellJson(robot.load_cell)),
+        ('/load_cell.json', LoadCellJson),
+        ('/queue', InspectQueue),
         ('/robot-control', RobotControlHandler),
         ('/templates/.*', StaticFileHandler),
         ('/bower_components/.*', StaticFileHandler)
@@ -61,13 +99,16 @@ def main():
     parser.set_defaults(fake=False)
     args = parser.parse_args()
 
+    global robot
+    global controller
     if args.fake:
-      from robot import FakeRobot
-      robot = FakeRobot()
+        from robot import FakeRobot
+        robot = FakeRobot()
     else:
-      from physical_robot import PhysicalRobot
-      robot = PhysicalRobot()
-    StartServer(args.port, robot)
+        from physical_robot import PhysicalRobot
+        robot = PhysicalRobot()
+    controller = Controller(robot)
+    StartServer(args.port)
 
 if __name__ == "__main__":
     main()

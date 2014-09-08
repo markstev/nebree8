@@ -2,7 +2,7 @@
 # Nebree8 robot.
 
 import time
-#from parts.load_cell import FakeLoadCellMonitor
+from parts.load_cell import FakeLoadCellMonitor
 
 class Robot(object):
   def CalibrateToZero(self):
@@ -31,19 +31,10 @@ class Robot(object):
     raise NotImplementedError()
 
 
-class FakeLoadCell2(object):
-  def recent(self, n):
-    recent_values = []
-    t0 = time.time()
-    for t in range(n):
-      recent_values.append((t + t0, 50.0))
-    return recent_values
-
 class FakeRobot(Robot):
   def __init__(self):
     self.position = 30.0
-    #self.load_cell = FakeLoadCellMonitor()
-    self.load_cell = FakeLoadCell2()
+    self.load_cell = FakeLoadCellMonitor()
 
   def CalibrateToZero(self):
     self._FakeMove(0)
