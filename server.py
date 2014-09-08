@@ -6,9 +6,12 @@ import logging
 import re
 import socket
 
-from controller import Controller
-from actions.meter import Meter
+from actions.compressor import CompressorToggle
+from actions.compressor import State
 from actions.home import Home
+from actions.meter import Meter
+from actions.move import Move
+from controller import Controller
 
 robot = None
 controller = None
@@ -68,8 +71,34 @@ class StaticFileHandler(webapp2.RequestHandler):
 
 class RobotControlHandler(webapp2.RequestHandler):
     def post(self):
-        print self.request.get("command")
-        print self.request.get("text")
+        command = self.request.get("command")
+        details = self.request.get("text")
+        print command
+        print details
+        if "calibrate" in command:
+          controller.EnqueueGroup([
+              Home(),
+          ])
+        elif "test drink" in command:
+          controller.EnqueueGroup([
+              Home(),
+              Meter(valve_to_actuate=0, oz_to_meter=1),
+          ])
+        elif "fill" in command:
+          pass
+        elif "move" in command:
+          controller.EnqueueGroup([
+              Move(float(details)),
+          ])
+        elif "compressor on" in command:
+          controller.EnqueueGroup([
+              CompressorToggle(State.ON)
+          ])
+        elif "compressor off" in command:
+          controller.EnqueueGroup([
+              CompressorToggle(State.OFF)
+          ])
+        self.response.write("ok")
     def get(self):
         print "Shouldn't call get!"
 
