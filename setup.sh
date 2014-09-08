@@ -3,7 +3,8 @@
 set -e
 
 function install_once {
-	sudo apt-get install \
+  git submodule update --init
+  sudo apt-get install \
     python-smbus python-pip i2c-tools \
     libxml2 python-dev python-pycurl python-pyquery
   sudo pip install --upgrade pip
