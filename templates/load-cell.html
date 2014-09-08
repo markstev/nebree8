@@ -1,51 +1,54 @@
 <polymer-element name="load-cell">
   <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-  <style>
-    /* tell the SVG path to be a thin blue line without any area fill */
-    .raw-line {
-      stroke: lightgray;
-      stroke-width: 1;
-      fill: none;
-    }
-
-    .avg-line {
-      stroke: blue;
-      stroke-width: 1;
-      fill: none;
-    }
-    
-    .axis {
-      shape-rendering: crispEdges;
-    }
-
-    .x.axis line {
-      stroke: lightgrey;
-    }
-
-    .x.axis .minor {
-      stroke-opacity: .5;
-    }
-
-    .x.axis path {
-      display: none;
-    }
-
-    .y.axis line, .y.axis path {
-      fill: none;
-      stroke: #000;
-    }
-    .graph-container {
-      width: 1000px;
-      height: 500px;
-    }
-  </style>
   <template>
-    <div class="graph-container">
-      <div id="graph" class="aGraph" style="position:absolute;top:0px;left:0; float:left;"></div>
-    </div>
+    <style>
+      :host {
+        display: block;
+        position: relative;
+      }
+      /* tell the SVG path to be a thin blue line without any area fill */
+      .raw-line {
+        stroke: lightgray;
+        stroke-width: 1;
+        fill: none;
+      }
 
+      .avg-line {
+        stroke: blue;
+        stroke-width: 1;
+        fill: none;
+      }
+      
+      .axis {
+        shape-rendering: crispEdges;
+      }
+
+      .x.axis line {
+        stroke: lightgrey;
+      }
+
+      .x.axis .minor {
+        stroke-opacity: .5;
+      }
+
+      .x.axis path {
+        display: none;
+      }
+
+      .y.axis line, .y.axis path {
+        fill: none;
+        stroke: #000;
+      }
+      .graph-container {
+        width: 1000px;
+        height: 500px;
+      }
+    </style>
+  <div layout vertical center>
       <div class="stat">Average: <span id="avg"></span></div>
       <div class="stat">Standard Deviation: <span id="stddev"></span></div>
+      <div id="graph" class="aGraph" style="position:absolute;top:0px;left:0; float:left;"></div>
+  </div>
   </template>
 
 <script>
@@ -136,6 +139,7 @@
                 .attr("transform", "translate(0," + h + ")")
                 .call(xAxis);
           graph.select(".raw-line")
+            .attr("class", "line")
             .attr("d", line(data));
           graph.select(".avg-line")
             .attr("d", line(avg_data));
