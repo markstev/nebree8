@@ -5,7 +5,6 @@ import random
 import time
 import threading
 
-from Adafruit_ADS1x15 import ADS1x15
 from collections import deque, namedtuple
 
 SAMPLES_PER_SECOND=256
@@ -18,12 +17,16 @@ class LoadCellMonitor(threading.Thread):
     def __init__(self, bufsize=10000, adc=None):
         super(LoadCellMonitor, self).__init__()
         self.buffer = deque(maxlen=bufsize)
-        try:
-            self.adc = ADS1x15(ic=ADS1115) if not adc else adc
-        except IOError:
-            print ("Failed to open i2c device -- have you run ./setup.py " +
-                    "initialize?\n")
-            raise
+        if not adc:
+          try:
+              from Adafruit_ADS1x15 import ADS1x15
+              self.adc = ADS1x15(ic=ADS1115)
+          except IOError:
+              print ("Failed to open i2c device -- have you run ./setup.py " +
+                      "initialize?\n")
+              raise
+        else:
+          self.adc = adc
         self.shutdown = False
         self.daemon = True
         self.start()

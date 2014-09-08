@@ -65,7 +65,7 @@ class Meter(Action):
         self.valve_to_actuate = valve_to_actuate
         self.oz_to_meter = oz_to_meter
 
-    def __callable__(self, robot):
+    def __call__(self, robot):
         if self.oz_to_meter == 0:
             logging.warning("oz_to_meter was zero, returning early.")
         tare = __tare(robot)
