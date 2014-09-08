@@ -13,10 +13,15 @@ from actions.home import Home
 robot = None
 controller = None
 
+
+def GetTemplate(filename):
+    return open('templates/' + filename).read()
+
+
 def ServeFile(filename):
     class ServeFileImpl(webapp2.RequestHandler):
         def get(self):
-            self.response.write(open('templates/' + filename).read())
+            self.response.write(GetTemplate(filename))
     return ServeFileImpl
 
 
@@ -37,10 +42,17 @@ class MakeTestDrink(webapp2.RequestHandler):
         self.response.write("Queued.")
 
 
-class CheckQueue(webapp2.RequestHandler):
+class InspectQueue(webapp2.RequestHandler):
     def get(self):
-        self.response.write('\n'.join('%s\n\t%s' % a.inspect()
-            for a in controller.InspectQueue()))
+        """Displays the state of the action queue."""
+        actions = controller.InspectQueue()
+        if not actions:
+            content = "Queue is empty"
+        else:
+            content = '\n'.join(
+              '%s\n\t%s' % a.inspect() for a in actions)
+        self.response.write(GetTemplate('queue.html').format(content=content))
+
 
 def StartServer(port):
     from paste import httpserver
@@ -49,7 +61,8 @@ def StartServer(port):
         ('/', ServeFile('index.html')),
         ('/test_drink', MakeTestDrink),
         ('/load_cell', ServeFile('load_cell.html')),
-        ('/load_cell.json', LoadCellJson)
+        ('/load_cell.json', LoadCellJson),
+        ('/queue', InspectQueue),
     ])
     print "serving at http://%s:%i" % (socket.gethostname(), port)
     httpserver.serve(app, host="0.0.0.0", port=port)

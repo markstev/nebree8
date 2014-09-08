@@ -5,6 +5,7 @@ import collections
 
 class Controller:
   def __init__(self, robot):
+    self.current_action = None
     self.queue = collections.deque()
     self.queued_sem = threading.Semaphore(0)
     self.queue_lock = threading.Lock()
@@ -17,8 +18,8 @@ class Controller:
     while True:
       self.queued_sem.acquire() # Ensure there are items to process.
       with self.queue_lock:
-        action = self.queue.popleft()
-      action(self.robot)
+        self.current_action = self.queue.popleft()
+      self.current_action(self.robot)
 
   def EnqueueGroup(self, action_group):
     with self.queue_lock:
@@ -29,4 +30,5 @@ class Controller:
 
   def InspectQueue(self):
     with self.queue_lock:
-      return list(self.queue)
+      return (([self.current_action] if self.current_action else []) +
+          list(self.queue))
