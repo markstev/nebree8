@@ -5,6 +5,7 @@ import BaseHTTPServer
 import logging
 import re
 import socket
+import time
 
 from actions.compressor import CompressorToggle
 from actions.compressor import State
@@ -124,6 +125,10 @@ class RobotControlHandler(webapp2.RequestHandler):
 def StartServer(port):
     from paste import httpserver
 
+    logging.basicConfig(
+        filename="server_%s.log" % time.strftime("%Y%m%d_%H%M%S"),
+        filemode='w',
+        level=logging.DEBUG)
     app = webapp2.WSGIApplication([
         ('/', ServeFile('index.html')),
         ('/test_drink', MakeTestDrink),

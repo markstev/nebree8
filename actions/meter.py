@@ -1,16 +1,17 @@
 """Meter a given amount of fluid into the container."""
 
 import logging
+import numpy
 
 from actions.action import Action, ActionException
 from collections import namedtuple
 from time import time, sleep
 
 VALVE_ACTUATION_DELAY_SECS = 0.3
-ADC_VALUES_TO_OZ = 2.5 / (1000 * 1./30)
+ADC_VALUES_TO_OZ = 2.5 / (1./30)
 MAX_TARE_STDDEV = .03
 TARE_TIMEOUT_SECS = 2
-MAX_METER_SECS = 5
+MAX_METER_SECS = 15
 
 class TareTimeout(ActionException):
   """Thrown when attempt to tare times out"""
@@ -59,8 +60,13 @@ def _predict_fill_completion(summary, target_reading):
   """
   if summary.mean >= target_reading:
     return 0
-  else:
-    return time() + VALVE_ACTUATION_DELAY_SECS + .01
+  A = numpy.array([numpy.array([r[0] for r in summary.records]),
+      numpy.ones(len(summary.records))])
+  y = numpy.array([r[1] for r in summary.records])
+  w = numpy.linalg.lstsq(A.T, y)[0]
+  target_ts = (target_reading - w[1]) / (w[0])
+  logging.info("target_ts=%s slope=%s intercept=%s", target_ts, w[0], w[1])
+  return target_ts
 
 FillInfo = namedtuple('FillInfo', ['m_actuation_delay', 'target_ts'])
 

@@ -59,7 +59,7 @@ class LoadCellMonitor(threading.Thread):
     def run(self):
         while not self.shutdown:
             val = self.adc.readADCSingleEnded(
-                    1, 4096, SAMPLES_PER_SECOND) / 1000.0
+                    1, 4096, SAMPLES_PER_SECOND)
             ts = time.time()
             self.buffer.append((ts, val))
 
