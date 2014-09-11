@@ -40,7 +40,10 @@ class MakeTestDrink(webapp2.RequestHandler):
     def get(self):  # TODO: Switch to post.
         controller.EnqueueGroup([
             Home(),
-            Meter(valve_to_actuate=0, oz_to_meter=1),
+            Move(5),
+            Meter(valve_to_actuate=1, oz_to_meter=1),
+            Move(10),
+            Meter(valve_to_actuate=2, oz_to_meter=2),
         ])
         self.response.write("Queued.")
 
@@ -148,7 +151,7 @@ def main():
     global robot
     global controller
     if args.fake:
-        from robot import FakeRobot
+        from fake_robot import FakeRobot
         robot = FakeRobot()
     else:
         from physical_robot import PhysicalRobot
