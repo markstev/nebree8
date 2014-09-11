@@ -86,7 +86,7 @@ class FakeLoadCellMonitor(LoadCellMonitor):
 
 def main():
   from math import sqrt
-  monitor = FakeLoadCellMonitor(bufsize=100000)
+  monitor = LoadCellMonitor(bufsize=100000)
   while True:
     time.sleep(1)
     recent = monitor.recent_summary(secs=1)

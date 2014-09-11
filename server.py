@@ -126,7 +126,8 @@ def StartServer(port):
     from paste import httpserver
 
     logging.basicConfig(
-        filename="server_%s.log" % time.strftime("%Y%m%d_%H%M%S"),
+        filename="/dev/stdout",
+        #filename="server_%s.log" % time.strftime("%Y%m%d_%H%M%S"),
         filemode='w',
         level=logging.DEBUG)
     app = webapp2.WSGIApplication([

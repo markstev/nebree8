@@ -41,6 +41,8 @@ class Controller:
       except Exception, e:
         threading.Thread(target=self.KillProcess).start()
         raise
+      finally:
+        self.current_action = None
 
   def EnqueueGroup(self, action_group):
     with self.queue_lock:
