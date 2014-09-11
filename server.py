@@ -5,6 +5,7 @@ import BaseHTTPServer
 import logging
 import re
 import socket
+import time
 
 from actions.compressor import CompressorToggle
 from actions.compressor import State
@@ -40,7 +41,10 @@ class MakeTestDrink(webapp2.RequestHandler):
     def get(self):  # TODO: Switch to post.
         controller.EnqueueGroup([
             Home(),
-            Meter(valve_to_actuate=0, oz_to_meter=1),
+            Move(5),
+            Meter(valve_to_actuate=1, oz_to_meter=1),
+            Move(10),
+            Meter(valve_to_actuate=2, oz_to_meter=2),
         ])
         self.response.write("Queued.")
 
@@ -58,7 +62,22 @@ class InspectQueue(webapp2.RequestHandler):
                 content.append(name)
                 for prop in props.items():
                   content.append('\t%s: %s' % prop)
-        self.response.write(GetTemplate('queue.html').format(content='\n'.join(content)))
+        self.response.write(GetTemplate('queue.html').format(
+          exception=controller.last_exception, content='\n'.join(content)))
+
+
+class RetryQueue(webapp2.RequestHandler):
+  def post(self):
+    if controller.last_exception:
+      controller.Retry()
+    self.response.write("Restarted queue")
+
+
+class ClearQueue(webapp2.RequestHandler):
+  def post(self):
+    if controller.last_exception:
+      controller.ClearAndResume()
+    self.response.write("Cleared queue")
 
 
 class StaticFileHandler(webapp2.RequestHandler):
@@ -106,12 +125,18 @@ class RobotControlHandler(webapp2.RequestHandler):
 def StartServer(port):
     from paste import httpserver
 
+    logging.basicConfig(
+        filename="server_%s.log" % time.strftime("%Y%m%d_%H%M%S"),
+        filemode='w',
+        level=logging.DEBUG)
     app = webapp2.WSGIApplication([
         ('/', ServeFile('index.html')),
         ('/test_drink', MakeTestDrink),
         ('/load_cell', ServeFile('load_cell.html')),
         ('/load_cell.json', LoadCellJson),
         ('/queue', InspectQueue),
+        ('/queue-retry', RetryQueue),
+        ('/queue-clear', ClearQueue),
         ('/robot-control', RobotControlHandler),
         ('/templates/.*', StaticFileHandler),
         ('/bower_components/.*', StaticFileHandler)
@@ -131,7 +156,7 @@ def main():
     global robot
     global controller
     if args.fake:
-        from robot import FakeRobot
+        from fake_robot import FakeRobot
         robot = FakeRobot()
     else:
         from physical_robot import PhysicalRobot

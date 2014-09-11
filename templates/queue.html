@@ -3,8 +3,13 @@
     <title>Queue</title>
   </head>
 <body>
+<form action="/queue-retry" method="post"><button>Retry Current Action</button></form>
+<form action="/queue-clear" method="post"><button>Clear Queue</button></form>
 <pre>
-  {content}
+  Exception: {exception}
+</pre>
+<pre>
+{content}
 </pre>
 </body>
 </html>

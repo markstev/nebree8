@@ -1,7 +1,7 @@
 import io_bank
-import robot
+from robot import Robot
 from parts.load_cell import LoadCellMonitor
-import motor
+from motor import StepperMotor, RobotRail
 
 
 class PhysicalRobot(Robot):
@@ -9,7 +9,7 @@ class PhysicalRobot(Robot):
   def __init__(self):
     self.io = io_bank.IOBank()
     motor = StepperMotor(io=self.io)  # Not a dry run
-    self.rail = motor.RobotRail(motor)
+    self.rail = RobotRail(motor)
     self.load_cell = LoadCellMonitor()
 
   def CalibrateToZero(self):
@@ -22,7 +22,7 @@ class PhysicalRobot(Robot):
     pass
 
   def ActivateCompressor(self):
-    io.WriteOutput(io_bank.Outputs.COMPRESSOR, 0)
+    self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 0)
 
   def DeactivateCompressor(self):
-    io.WriteOutput(io_bank.Outputs.COMPRESSOR, 1)
+    self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 1)

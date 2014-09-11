@@ -5,7 +5,9 @@ function, etc. Handles details like some outputs being on shift registers,
 etc."""
 
 import enum
+import threading
 import time
+import Queue
 import RPi.GPIO as gpio
 
 DEBUG = True
@@ -42,6 +44,7 @@ class Inputs(enum.Enum):
   LIMIT_SWITCH_POS = 23
   LIMIT_SWITCH_NEG = 24
   
+_SHIFT_REG_REFRESH_RATE = 10
 _SHIFT_REG_SLEEP_TIME = 0.1 # 1 ms -> 1khz
 _SHIFT_REG_ADDRESS_OFFSET = 1000
 
@@ -55,6 +58,10 @@ class IOBank(object):
     for pin in Inputs:
       gpio.setup(pin.value, gpio.IN, pull_up_down=gpio.PUD_UP)
     self.current_shifted_byte = [0] * 8
+    self.signal_refresh = Queue.Queue(1)
+    self.thread = threading.Thread(target=self.__RefreshShiftOutputs)
+    self.thread.daemon = True
+    self.thread.start()
     #self.WriteOutput(Outputs.COMPRESSOR, 0)
 
   def ReadInput(self, input_enum):
@@ -74,19 +81,16 @@ class IOBank(object):
       # 2: set bit, then toggle clock
       shift_register_index = output_enum.value - _SHIFT_REG_ADDRESS_OFFSET
       self.current_shifted_byte[shift_register_index] = value
-      self.Shift(self.current_shifted_byte)
-      self.Shift(self.current_shifted_byte)
-      self.Shift(self.current_shifted_byte)
+      self.__SignalRefresh()
 
-  def Shift(self, byte): 
+
+  def __Shift(self, byte):
     SLEEP_TIME = 0.0001
     byte = list(byte)
     byte.reverse()
-    DebugPrint("Writing byte ", byte, " into shift register.")
     self.WriteOutput(Outputs.SHIFT_REG_RCLOCK, gpio.LOW)
     for bitnum, bit in enumerate(byte):
       foodbit = bit
-      DebugPrint("shift bit #", 7 - bitnum, " into register with bit ", foodbit)
       self.WriteOutput(Outputs.SHIFT_REG_CLOCK, gpio.LOW)
       time.sleep(SLEEP_TIME)
       self.WriteOutput(Outputs.SHIFT_REG_SERIAL, foodbit)
@@ -94,9 +98,23 @@ class IOBank(object):
       self.WriteOutput(Outputs.SHIFT_REG_CLOCK, gpio.HIGH)
       time.sleep(SLEEP_TIME)
     self.WriteOutput(Outputs.SHIFT_REG_CLOCK, gpio.LOW)  # Reset to a safe state.
-    DebugPrint("and lock")
     self.WriteOutput(Outputs.SHIFT_REG_RCLOCK, gpio.LOW)
     #GPIO.output(gpiomap[swallow], GPIO.LOW)
     self.WriteOutput(Outputs.SHIFT_REG_RCLOCK, gpio.HIGH)
     self.WriteOutput(Outputs.SHIFT_REG_RCLOCK, gpio.LOW)
     #GPIO.output(gpiomap[swallow], GPIO.HIGH)
+
+  def __RefreshShiftOutputs(self):
+    while True:
+      # TODO: Do we need to shift multiple times?
+      self.__Shift(self.current_shifted_byte)
+      try:
+        self.signal_refresh.get(True, 1. / _SHIFT_REG_REFRESH_RATE)
+      except Queue.Empty:
+        pass # No refresh signals for a while, refresh anyway.
+
+  def __SignalRefresh(self):
+    try:
+      self.signal_refresh.put(None, False)
+    except Queue.Full:
+      pass  # Refresh already scheduled.
