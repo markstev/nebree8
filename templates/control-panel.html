@@ -3,24 +3,19 @@
 
 <polymer-element
     name="control-panel"
-    command_name="{{command_name}}"
-    command_id="{{command_id}}">
+    comm="{{comm}}">
   <template>
     <style>
     </style>
     <div layout horizontal>
       <command-button
           id="commandButton"
-          command_name="{{command_name}}"
-          command_id="{{command_id}}">
+          comm="{{comm}}">
       </command-button>
       <paper-input id="textInput" on-change="{{inputChange}}"></paper-input>
     </div>
   </template>
   <script>
-  //document.querySelector('paper-input').addEventListener('change', function(event) {
-  //  alert(event.target.value);
-  //});
   Polymer({
     publish: {
       comm: {
