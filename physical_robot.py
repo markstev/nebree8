@@ -18,8 +18,8 @@ class PhysicalRobot(Robot):
   def MoveToPosition(self, position_in_inches):
     self.rail.FillPositions([position_in_inches])
 
-  def Fill(self, weight_in_grams):
-    pass
+  def OpenValve(self, valve_no):
+    raise NotImplementedError()
 
   def ActivateCompressor(self):
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 0)

@@ -11,6 +11,7 @@ class FakeRobot(Robot):
     import collections
     self.position = 30.0
     self.load_cell = FakeLoadCellMonitor()
+    self.load_cell.stddev = 1
     self.valves = collections.defaultdict(lambda: False)
 
   def __check_position(self, valve_no):
