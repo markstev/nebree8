@@ -60,15 +60,20 @@ class Controller:
     time.sleep(1)
     os._exit(1)
 
+  def __Resume(self):
+    self.last_exception = None
+    self.resume_lock.release()
+
   def ClearAndResume(self):
     print "Clearing queue"
-    self.last_exception = None
     self.queue.clear()
-    self.resume_lock.release()
+    self.__Resume()
+
+  def SkipAndResume(self):
+    self.__Resume()
 
   def Retry(self):
     print "Kicking off retry..."
-    self.last_exception = None
     self.queue.appendleft(self.current_action)
     self.queued_sem.release()
-    self.resume_lock.release()
+    self.__Resume()

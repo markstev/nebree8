@@ -80,6 +80,13 @@ class ClearQueue(webapp2.RequestHandler):
     self.response.write("Cleared queue")
 
 
+class SkipQueue(webapp2.RequestHandler):
+  def post(self):
+    if controller.last_exception:
+      controller.SkipAndResume()
+    self.response.write("Skipped and resumed queue")
+
+
 class StaticFileHandler(webapp2.RequestHandler):
     def get(self):
         self.response.write(open(self.ToRelativePath(self.request.path)).read())
@@ -138,6 +145,7 @@ def StartServer(port):
         ('/queue', InspectQueue),
         ('/queue-retry', RetryQueue),
         ('/queue-clear', ClearQueue),
+        ('/queue-skip', SkipQueue),
         ('/robot-control', RobotControlHandler),
         ('/templates/.*', StaticFileHandler),
         ('/bower_components/.*', StaticFileHandler)
