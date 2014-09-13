@@ -129,6 +129,16 @@ class RobotControlHandler(webapp2.RequestHandler):
         print "Shouldn't call get!"
 
 
+class PausableWSGIApplication(webapp2.WSGIApplication):
+  def __init__(self, routes=None, debug=False, config=None):
+    super(PausableWSGIApplication, self).__init__(routes=routes, debug=debug, config=config)
+    self.drop_all = False
+
+  def __call__(self, environ, start_response):
+    while self.drop_all:
+      time.sleep(1.0)
+    return super(PausableWSGIApplication, self).__call__(environ, start_response)
+
 def StartServer(port):
     from paste import httpserver
 
@@ -137,7 +147,8 @@ def StartServer(port):
         #filename="server_%s.log" % time.strftime("%Y%m%d_%H%M%S"),
         filemode='w',
         level=logging.DEBUG)
-    app = webapp2.WSGIApplication([
+    #app = webapp2.WSGIApplication([
+    app = PausableWSGIApplication([
         ('/', ServeFile('index.html')),
         ('/test_drink', MakeTestDrink),
         ('/load_cell', ServeFile('load_cell.html')),
@@ -150,8 +161,14 @@ def StartServer(port):
         ('/templates/.*', StaticFileHandler),
         ('/bower_components/.*', StaticFileHandler)
     ])
+    controller.app = app
     print "serving at http://%s:%i" % (socket.gethostname(), port)
-    httpserver.serve(app, host="0.0.0.0", port=port)
+    from multiprocessing import Pool
+    pool = Pool(5)
+    # while True:
+    #   while app.drop_all:
+    #     time.sleep(1.0)
+    httpserver.serve(app, host="0.0.0.0", port=port, start_loop=False, use_threadpool=pool)
 
 def main():
     import argparse

@@ -13,10 +13,14 @@ class PhysicalRobot(Robot):
     self.load_cell = LoadCellMonitor()
 
   def CalibrateToZero(self):
+    self.cannot_interrupt = True
     self.rail.CalibrateToZero()
+    self.cannot_interrupt = False
 
   def MoveToPosition(self, position_in_inches):
+    self.cannot_interrupt = True
     self.rail.FillPositions([position_in_inches])
+    self.cannot_interrupt = False
 
   def OpenValve(self, valve_no):
     raise NotImplementedError()

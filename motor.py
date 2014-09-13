@@ -24,6 +24,12 @@ import time
 #     gpio.setup(pin, gpio.OUT)
 # gpio.output(en_pin, 0)
 
+def trusty_sleep(n):
+  start = time.time()
+  while (time.time() - start < n):
+    #time.sleep(n - (time.time() - start))
+    pass
+
 class StepperMotor(object):
   def __init__(self, dry_run=False, io=None):
     self.pulse_state = False
@@ -35,8 +41,10 @@ class StepperMotor(object):
     self.colliding_negative = False
     def HitPositiveRail(channel):
       self.colliding_positive = True
+      print "Hit positive rail"
     def HitNegativeRail(channel):
-      self.colliding_negative = True
+      #self.colliding_negative = True
+      print "Hit negative rail"
     self.io.AddCallback(io_bank.Inputs.LIMIT_SWITCH_POS, gpio.FALLING,
         HitPositiveRail)
     self.io.AddCallback(io_bank.Inputs.LIMIT_SWITCH_NEG, gpio.FALLING,
@@ -56,7 +64,8 @@ class StepperMotor(object):
         #print self.pulse_state
         self.io.WriteOutput(io_bank.Outputs.STEPPER_PULSE, int(self.pulse_state))
         #gpio.output(pul_pin, int(self.pulse_state))
-        time.sleep(0.001)  # one millisecond
+        #time.sleep(0.001)  # one millisecond
+        trusty_sleep(0.001)
         self.pulse_state = not self.pulse_state
       if forward:
         self.colliding_negative = False
@@ -76,6 +85,7 @@ class RobotRail(object):
     for position in absolute_positions:
       forward = position > self.position
       steps = InchesToSteps(abs(position - self.position))
+      print steps
       self.motor.Move(steps, forward=forward)
       self.position = position
       print "At position: %f" % position

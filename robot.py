@@ -2,6 +2,10 @@
 # Nebree8 robot.
 
 class Robot(object):
+  def __init__(self):
+    self.cannot_interrupt = False
+  def UninterruptableMethod(self):
+    return self.cannot_interrupt
   def CalibrateToZero(self):
     """Moves the truck to position zero, relying on the touch sensor to stop it.
     """

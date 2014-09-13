@@ -19,6 +19,7 @@ class Controller:
     self.robot = robot
     self.last_exception = None
     self.__StartThread()
+    self.app = None
 
   def __StartThread(self):
     thread = threading.Thread(target=self.__Process)
@@ -32,6 +33,7 @@ class Controller:
       with self.queue_lock:
         self.current_action = self.queue.popleft()
       try:
+        self.app.drop_all = True
         self.current_action(self.robot)
       except ActionException, e:
         self.last_exception = e
@@ -43,6 +45,7 @@ class Controller:
         raise
       finally:
         self.current_action = None
+      self.app.drop_all = False
 
   def EnqueueGroup(self, action_group):
     with self.queue_lock:

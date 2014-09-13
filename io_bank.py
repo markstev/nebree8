@@ -44,7 +44,7 @@ class Inputs(enum.Enum):
   LIMIT_SWITCH_POS = 23
   LIMIT_SWITCH_NEG = 24
   
-_SHIFT_REG_REFRESH_RATE = 10
+_SHIFT_REG_REFRESH_RATE = 1
 _SHIFT_REG_SLEEP_TIME = 0.1 # 1 ms -> 1khz
 _SHIFT_REG_ADDRESS_OFFSET = 1000
 
@@ -110,7 +110,7 @@ class IOBank(object):
       self.__Shift(self.current_shifted_byte)
       try:
         self.signal_refresh.get(True, 1. / _SHIFT_REG_REFRESH_RATE)
-      except Queue.Empty:
+      except:  #Queue.Empty:
         pass # No refresh signals for a while, refresh anyway.
 
   def __SignalRefresh(self):

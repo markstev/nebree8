@@ -12,6 +12,8 @@ import argparse
 import io_bank
 import sys
 import time
+from motor import StepperMotor, RobotRail
+from parts.load_cell import LoadCellMonitor
 import RPi.GPIO as gpio
 
 def main(args):
@@ -26,6 +28,8 @@ def main(args):
                       help='IO pin to wait for a falling edge on')
   parser.add_argument('--valve_motor1_direction', type=int, nargs="?", default=0,
                       help='Direction to move valve motor1')
+  parser.add_argument('--positions', type=float, nargs="+", default=(),
+                      help='List of positions to move the truck through')
   args = parser.parse_args()
 
   if args.set_io:
@@ -45,6 +49,13 @@ def main(args):
       io.WriteOutput(io_bank.Outputs(io_bank.Outputs.MOTOR_UP_B), 1)
       io.WriteOutput(io_bank.Outputs(io_bank.Outputs.MOTOR_DOWN_B1), 1)
       print "not ready yet"
+  if args.positions:
+    load_cell = LoadCellMonitor()
+    io = io_bank.IOBank()
+    motor = StepperMotor(io=io)
+    rail = RobotRail(motor)
+    rail.FillPositions(args.positions)
+    gpio.cleanup()
   if args.wait_for_falling_io:
     io = io_bank.IOBank()
     def PrintCallback(channel):
@@ -53,6 +64,7 @@ def main(args):
                    PrintCallback)
     while True:
       time.sleep(60)
+  time.sleep(1)
 
 if __name__ == "__main__":
   main(sys.argv)
