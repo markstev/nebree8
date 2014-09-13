@@ -139,7 +139,7 @@
                 .attr("transform", "translate(0," + h + ")")
                 .call(xAxis);
           graph.select(".raw-line")
-            .attr("class", "line")
+            .attr("class", "raw-line")
             .attr("d", line(data));
           graph.select(".avg-line")
             .attr("d", line(avg_data));
