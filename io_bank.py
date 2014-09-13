@@ -31,14 +31,23 @@ class Outputs(enum.Enum):
   MOTOR_UP_A = 27
   MOTOR_UP_B = 22
 
-  X_6 = 1000
-  COMPRESSOR = 1001
-  X_2 = 1002
-  X_3 = 1003
-  X_4 = 1004
-  MOTOR_DOWN_A1 = 1005
-  MOTOR_DOWN_B1 = 1006
-  X_7 = 1007
+  VALVE_0 = 1000
+  VALVE_1 = 1001
+  VALVE_2 = 1002
+  VALVE_3 = 1003
+  VALVE_4 = 1004
+  VALVE_6 = 1005
+  VALVE_5 = 1006
+  VALVE_7 = 1007
+
+  VALVE_8 = 1008
+  VALVE_9 = 1009
+  VALVE_10 = 1010
+  VALVE_11 = 1011
+  VALVE_12 = 1012
+  VALVE_13 = 1013
+  VALVE_14 = 1014
+  VALVE_15 = 1015
 
 class Inputs(enum.Enum):
   LIMIT_SWITCH_POS = 23
@@ -57,7 +66,7 @@ class IOBank(object):
         gpio.setup(output.value, gpio.OUT)
     for pin in Inputs:
       gpio.setup(pin.value, gpio.IN, pull_up_down=gpio.PUD_UP)
-    self.current_shifted_byte = [0] * 8
+    self.current_shifted_byte = [0] * 16
     self.signal_refresh = Queue.Queue(1)
     self.thread = threading.Thread(target=self.__RefreshShiftOutputs)
     self.thread.daemon = True

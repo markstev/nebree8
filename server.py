@@ -163,12 +163,12 @@ def StartServer(port):
     ])
     controller.app = app
     print "serving at http://%s:%i" % (socket.gethostname(), port)
-    from multiprocessing import Pool
-    pool = Pool(5)
+    # from multiprocessing import Pool
+    # pool = Pool(5)
     # while True:
     #   while app.drop_all:
     #     time.sleep(1.0)
-    httpserver.serve(app, host="0.0.0.0", port=port, start_loop=False, use_threadpool=pool)
+    httpserver.serve(app, host="0.0.0.0", port=port, start_loop=True)  #, use_threadpool=pool)
 
 def main():
     import argparse

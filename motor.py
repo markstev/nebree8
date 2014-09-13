@@ -43,7 +43,7 @@ class StepperMotor(object):
       self.colliding_positive = True
       print "Hit positive rail"
     def HitNegativeRail(channel):
-      #self.colliding_negative = True
+      self.colliding_negative = True
       print "Hit negative rail"
     self.io.AddCallback(io_bank.Inputs.LIMIT_SWITCH_POS, gpio.FALLING,
         HitPositiveRail)
