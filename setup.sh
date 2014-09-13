@@ -15,7 +15,9 @@ function install_once {
 }
 
 function initialize {
-  
+  # Switch to performance governor.
+  echo performance |
+      sudo tee /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
   echo 'Reloading i2c module (might be needed per boot/user)'
   sudo rmmod i2c-bcm2708 || echo 'failed to unload -- ignoring'
   sudo rmmod i2c-dev || echo 'failed to unload -- ignoring'
