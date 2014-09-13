@@ -13,9 +13,12 @@ from actions.home import Home
 from actions.meter import Meter
 from actions.move import Move
 from controller import Controller
+import ingredients
 
 robot = None
 controller = None
+
+WT_TO_OZ = 1.0
 
 
 def GetTemplate(filename):
@@ -105,11 +108,24 @@ class RobotControlHandler(webapp2.RequestHandler):
           controller.EnqueueGroup([
               Home(),
           ])
-        elif "test drink" in command:
-          controller.EnqueueGroup([
-              Home(),
-              Meter(valve_to_actuate=0, oz_to_meter=1),
-          ])
+        elif "drink" in command:
+          target_composition = None
+          print "DRINK COMMAND: %s" % command
+          if "test" in command:
+            print "DRINK COMMAND: %s" % command
+            ingredient_to_wt_loc = ingredients.CreateTestDrink()
+          elif "sour drink" in command:
+            target_composition = [2, 1, 1, 0]
+            ingredient_to_wt_loc = ingredients.CreateRandomDrink(target_composition)
+          else:
+            target_composition = [4, 1, 0, 1]
+            ingredient_to_wt_loc = ingredients.CreateRandomDrink(target_composition)
+          actions = []
+          for ingredient, (wt, loc) in ingredient_to_wt_loc.iteritems():
+            print "%s oz of %s at %f on valve %s" % (wt, ingredient, loc, loc)
+            actions.append(Move(-10.5 - 4.0 * (14 - loc)))
+            actions.append(Meter(valve_to_actuate=loc, oz_to_meter=(wt * WT_TO_OZ)))
+          controller.EnqueueGroup(actions)
         elif "fill" in command:
           pass
         elif "move" in command:
@@ -146,7 +162,7 @@ def StartServer(port):
         filename="/dev/stdout",
         #filename="server_%s.log" % time.strftime("%Y%m%d_%H%M%S"),
         filemode='w',
-        level=logging.DEBUG)
+        level=logging.INFO)
     #app = webapp2.WSGIApplication([
     app = PausableWSGIApplication([
         ('/', ServeFile('index.html')),

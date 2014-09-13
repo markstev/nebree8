@@ -1,6 +1,8 @@
 import random
 import sys
 
+from io_bank import Outputs
+
 INGREDIENTS = {
   "tequila" : [1, 0, 0, 0],
   "rye" : [1, 0, 0, 0],
@@ -14,11 +16,12 @@ INGREDIENTS = {
   "lemon juice" : [0, 0, 1, 0],
   "simple syrup" : [0, 1, 0, 0],
   "agave syrup" : [0, 1, 0, 0],
-  "grenadine " : [0, 1, 0, 0],
+  "grenadine" : [0, 1, 0, 0],
   "Angostura bitters" : [0, 0, 0, 1],
 }
 
 
+# MUST MAP TO ORDER OF PHYSICAL VALVES
 INGREDIENTS_ORDERED = (
   "tequila",
   "rye",
@@ -32,10 +35,9 @@ INGREDIENTS_ORDERED = (
   "lemon juice",
   "simple syrup",
   "agave syrup",
-  "grenadine ",
-  "Angostura bitters",
+  "grenadine",
+  "Angostura bitters"
 )
-
 
 def CreateRandomDrink(target_weight):
   """Returns a dict from ingredient to (volume, location)"""
@@ -58,11 +60,26 @@ def CreateRandomDrink(target_weight):
   return ingredient_to_weight
 
 
+def CreateDrink(list_of_ingredients):
+  ingredient_to_weight = {}
+  for ingredient in list_of_ingredients:
+    try:
+      ingredient_to_weight[ingredient] = (1.0, INGREDIENTS_ORDERED.index(ingredient))
+    except:
+      print "ERROR: %s is missing" % ingredient
+  return ingredient_to_weight
+
+
+def CreateTestDrink():
+  return CreateDrink(["agave syrup", "lemon juice", "grenadine"])
+
+
 def main(args):
   target_weight = [4, 1, 0, 1]  # Spiritous
   print CreateRandomDrink(target_weight)
   target_weight = [2, 1, 1, 0]  # Sour
   print CreateRandomDrink(target_weight)
+  print CreateTestDrink()
 
 
 if __name__ == "__main__":

@@ -40,14 +40,38 @@ class Outputs(enum.Enum):
   VALVE_5 = 1006
   VALVE_7 = 1007
 
-  VALVE_8 = 1008
-  VALVE_9 = 1009
-  VALVE_10 = 1010
-  VALVE_11 = 1011
-  VALVE_12 = 1012
-  VALVE_13 = 1013
-  VALVE_14 = 1014
-  VALVE_15 = 1015
+  VALVE_8 = 1015  # TO VERIFY
+  VALVE_9 = 1014  # TO VERIFY
+  VALVE_10 = 1008
+  VALVE_11 = 1009
+  VALVE_12 = 1010
+  VALVE_13 = 1011
+  VALVE_14 = 1012
+  VALVE_15 = 1013 # NOT CONNECTED
+
+VALVES = (
+    Outputs.VALVE_0,
+    Outputs.VALVE_1,
+    Outputs.VALVE_2,
+    Outputs.VALVE_3,
+    Outputs.VALVE_4,
+    Outputs.VALVE_5,
+    Outputs.VALVE_6,
+    Outputs.VALVE_7,
+    Outputs.VALVE_8,
+    Outputs.VALVE_9,
+    Outputs.VALVE_10,
+    Outputs.VALVE_11,
+    Outputs.VALVE_12,
+    Outputs.VALVE_13,
+    Outputs.VALVE_14,
+    Outputs.VALVE_15,
+)
+
+
+def GetValve(index):
+  return VALVES[index]
+
 
 class Inputs(enum.Enum):
   LIMIT_SWITCH_POS = 23
