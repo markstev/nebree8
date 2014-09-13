@@ -8,7 +8,7 @@ from collections import namedtuple
 from time import time, sleep
 
 VALVE_ACTUATION_DELAY_SECS = 0.3
-OZ_TO_ADC_VALUES = 42.
+OZ_TO_ADC_VALUES = 38.35
 MAX_TARE_STDDEV = 2.
 TARE_TIMEOUT_SECS = 2.
 MAX_METER_SECS = 15.
