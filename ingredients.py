@@ -1,8 +1,6 @@
 import random
 import sys
 
-from io_bank import Outputs
-
 INGREDIENTS = {
   "tequila" : [1, 0, 0, 0],
   "rye" : [1, 0, 0, 0],

@@ -14,6 +14,7 @@ from actions.home import Home
 #from actions.meter import Meter
 #from actions.meter_dead_reckoned import MeterDeadReckoned as Meter
 from actions.meter_simple import MeterSimple as Meter
+from actions.meter_bitters import MeterBitters
 from actions.move import Move
 from actions.vent import Vent
 from actions.wait_for_glass_removal import WaitForGlassRemoval
@@ -158,7 +159,10 @@ class RobotControlHandler(webapp2.RequestHandler):
           for ingredient, (wt, loc) in ingredient_to_wt_loc.iteritems():
             print "%s oz of %s at %f on valve %s" % (wt, ingredient, loc, loc)
             actions.append(Move(-10.5 - 4.0 * (14 - loc)))
-            actions.append(Meter(valve_to_actuate=loc, oz_to_meter=(wt * WT_TO_OZ)))
+            if 'bitter' in ingredient:
+              actions.append(Meter(valve_to_actuate=loc, oz_to_meter=(wt * WT_TO_OZ)))
+            else:
+              actions.append(MeterBitters(valve_to_actuate=loc, drops_to_meter=4))
           actions.append(Home())
           actions.append(WaitForGlassRemoval())
           controller.EnqueueGroup(actions)
@@ -213,7 +217,7 @@ def StartServer(port):
         level=logging.INFO)
     #app = webapp2.WSGIApplication([
     app = PausableWSGIApplication([
-        ('/', ServeFile('index.html')),
+        ('/', ServeFile('index-iframe.html')),
         ('/test_drink', MakeTestDrink),
         ('/load_cell', ServeFile('load_cell.html')),
         ('/load_cell.json', LoadCellJson),

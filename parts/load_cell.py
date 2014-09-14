@@ -49,7 +49,10 @@ class LoadCellMonitor(threading.Thread):
         if n == 0:
             return Summary([], 0, 0, time.time())
         mean = sum(v for t, v in recs) / n
-        stddev = math.sqrt(sum((v - mean)**2 for t, v in recs) / (n - 1))
+        if n > 1:
+          stddev = math.sqrt(sum((v - mean)**2 for t, v in recs) / (n - 1))
+        else:
+          stddev = 0.
         return Summary(recs, mean, stddev, max(ts for ts, v in recs))
 
     def stop(self):
