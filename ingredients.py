@@ -77,6 +77,10 @@ def CreateTestDrink(n=3):
   return CreateDrink(["mezcal", "lemon juice", "grenadine"][:n])
 
 
+def PrimeRun():
+  return {
+    ingredient: (.1, i) for i, ingredient in enumerate(INGREDIENTS_ORDERED)}
+
 def main(args):
   target_weight = [4, 1, 0, 1]  # Spiritous
   print CreateRandomDrink(target_weight)
