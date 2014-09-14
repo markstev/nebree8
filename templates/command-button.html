@@ -5,20 +5,23 @@
   <template>
     <style>
     </style>
-    <paper-button
-      label="{{comm}}"
-      on-tap="{{buttonClick}}"
-      raisedButton>
-    </paper-button>
+    <div layout horizontal>
+      <paper-button
+        label="{{comm}}"
+        on-tap="{{buttonClick}}"
+        raisedButton>
+      </paper-button>
+      <span id="reply"</span>
 
-    <core-ajax id="command"
-      auto=false
-      url="../robot-control"
-      params='{"command":"{{comm}}", "text":"{{textValue}}"}'
-      handleAs="json"
-      method="POST"
-      on-core-response="{{handleResponse}}">
-    </core-ajax>
+      <core-ajax id="command"
+        auto=false
+        url="../robot-control"
+        params='{"command":"{{comm}}", "text":"{{textValue}}"}'
+        handleAs="json"
+        method="POST"
+        on-core-response="{{handleResponse}}">
+      </core-ajax>
+    </div>
   </template>
   <script>
   Polymer({
@@ -31,7 +34,8 @@
     buttonClick: function(event, detail, sender) {
       this.$.command.go();
     },
-    handleResponse: function(event, detail, sender) {
+    handleResponse: function(event, response) {
+      this.$.reply.innerHTML = response.response;
     }
   });
   </script>

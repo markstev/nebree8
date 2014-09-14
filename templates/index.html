@@ -28,14 +28,15 @@
 </head>
 <body>
   <h1>NE Bre 8 Dev Console</h1>
-  <div class="container" layout vertical center>
+  <div class="container" layout vertical left>
     <div layout vertical justified>
-      <div layout horizontal><command-button comm="calibrate"></command-button></div>
-      <command-button comm="test drink"></command-button>
-      <command-button comm="Margarita"></command-button>
-      <command-button comm="Whiskey Sour"></command-button>
+      <h3>Common Drinks</h3>
+      <command-button comm="margarita"></command-button>
+      <command-button comm="whiskey sour"></command-button>
+      <h3>Try something crazy</h3>
       <command-button comm="spiritous drink (randomly generated)"></command-button>
       <command-button comm="sour drink (randomly generated)"></command-button>
+      <h3>Machine details</h3>
       <robot-status></robot-status>
       <load-cell></load-cell>
     </div>

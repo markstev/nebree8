@@ -161,6 +161,9 @@ class RobotControlHandler(webapp2.RequestHandler):
           actions.append(Home())
           actions.append(WaitForGlassRemoval())
           controller.EnqueueGroup(actions)
+          self.response.write("Randomized ingredients: %s" %
+              ", ".join(ingredient_to_wt_loc.keys()))
+          return
         elif "fill" in command:
           oz, valve = details.split(",")
           oz = float(oz)

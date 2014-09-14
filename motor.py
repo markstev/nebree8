@@ -25,10 +25,11 @@ import time
 # gpio.output(en_pin, 0)
 
 def trusty_sleep(n):
-  start = time.time()
-  while (time.time() - start < n):
-    #time.sleep(n - (time.time() - start))
-    pass
+  return time.sleep(n)
+  # start = time.time()
+  # while (time.time() - start < n):
+  #   #time.sleep(n - (time.time() - start))
+  #   pass
 
 class StepperMotor(object):
   def __init__(self, dry_run=False, io=None):
@@ -60,6 +61,8 @@ class StepperMotor(object):
     self.io.WriteOutput(io_bank.Outputs.STEPPER_DIR, forward)
     #gpio.output(pul_pin, 0)
     #gpio.output(dir_pin, forward)
+    current_wait = 0.002
+    final_wait = 0.0002
     for i in range(steps):
       if (not ((self.colliding_positive and forward)
                or (self.colliding_negative and not forward))):
@@ -67,12 +70,17 @@ class StepperMotor(object):
         self.io.WriteOutput(io_bank.Outputs.STEPPER_PULSE, int(self.pulse_state))
         #gpio.output(pul_pin, int(self.pulse_state))
         #time.sleep(0.001)  # one millisecond
-        trusty_sleep(0.001)
+        #trusty_sleep(0.001)
+        #trusty_sleep(0.0002)
+        trusty_sleep(current_wait)
         self.pulse_state = not self.pulse_state
       if forward:
         self.colliding_negative = False
       else:
         self.colliding_positive = False
+      if current_wait > final_wait:
+        current_wait *= 0.95
+        pass
     self.io.WriteOutput(io_bank.Outputs.STEPPER_PULSE, 0)
 
 def InchesToSteps(inches):
@@ -87,11 +95,9 @@ class RobotRail(object):
     for position in absolute_positions:
       forward = position > self.position
       steps = InchesToSteps(abs(position - self.position))
-      print steps
       self.motor.Move(steps, forward=forward)
       self.position = position
       print "At position: %f" % position
-      time.sleep(2.0)
 
   def CalibrateToZero(self):
     steps = InchesToSteps(200)

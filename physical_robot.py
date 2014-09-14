@@ -21,6 +21,7 @@ class PhysicalRobot(Robot):
 
   def CalibrateToZero(self):
     self.cannot_interrupt = True
+    time.sleep(0.5)
     self.Chuck()
     self.rail.CalibrateToZero()
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 1)
@@ -28,6 +29,7 @@ class PhysicalRobot(Robot):
 
   def MoveToPosition(self, position_in_inches):
     self.cannot_interrupt = True
+    time.sleep(0.5)
     self.Chuck()
     self.rail.FillPositions([position_in_inches])
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 1)
