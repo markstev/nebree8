@@ -140,7 +140,6 @@
              std_dev_elt.innerHTML = stddev.toFixed(4);
           }
           var svg_size = that.$.graph.getBoundingClientRect();
-          console.log(svg_size)
           var w = svg_size.width;
           var h = svg_size.height;
           x = d3.scale.linear().domain(d3.extent(data.map(get_x))).range([0, w]);
