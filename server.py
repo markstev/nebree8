@@ -151,6 +151,8 @@ class RobotControlHandler(webapp2.RequestHandler):
           elif "sour drink" in command:
             target_composition = [2, 1, 1, 0]
             ingredient_to_wt_loc = ingredients.CreateRandomDrink(target_composition)
+          elif "!!prime" in command:
+            ingredient_to_wt_loc = ingredients.PrimeRun()
           else:
             target_composition = [4, 1, 0, 1]
             ingredient_to_wt_loc = ingredients.CreateRandomDrink(target_composition)
