@@ -15,7 +15,7 @@ class FakeRobot(Robot):
     self.valves = collections.defaultdict(lambda: False)
 
   def __check_position(self, valve_no):
-    if abs(self.position - valve_no * 5.) > 1:
+    if abs(self.position - (-10.5 - 4. * (14 - valve_no))) > 1:
       raise ActionException("Caddy wasn't in the right position!")
 
   @staticmethod

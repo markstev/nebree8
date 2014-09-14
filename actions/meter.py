@@ -71,7 +71,6 @@ def _predict_fill_completion(summary, target_reading):
   target_ts = (target_reading - w[1]) / (w[0]) + summary.timestamp
   if target_ts < summary.timestamp:  # Slope is negative, probably due to noise.
     return summary.timestamp + MAX_METER_SECS, w[0], w[1]
-  
   return (target_ts, w[0], w[1])
 
 FillInfo = namedtuple('FillInfo', ['m_actuation_delay', 'target_ts', 'summary',
@@ -110,27 +109,34 @@ class Meter(Action):
     print "Waiting to tare"
     self.tare = _tare(robot)
     print "Tared", _format_summary(start_ts, self.tare)
-    self.target_reading = self.oz_to_meter * OZ_TO_ADC_VALUES + self.tare.mean
+    self.adc_units_to_meter = self.oz_to_meter * OZ_TO_ADC_VALUES
+    self.target_reading = self.adc_units_to_meter + self.tare.mean
     print "target_reading=%s oz_to_meter=%s self.tare.mean=%s" % (
        self.target_reading, self.oz_to_meter, self.tare.mean)
     self.measured_actuation_delay = 2.
     last_print = 0
-    with robot.OpenValve(self.valve_to_actuate):
-      for info in _wait_until_filled(
-          tare=self.tare,
-          load_cell=robot.load_cell,
-          target_reading=self.target_reading,
-          deadline=self.tare.timestamp + MAX_METER_SECS):
-        self.info = info
-        self.elapsed = time() - self.tare.timestamp
-        self.time_remaining = info.target_ts - time()
-        self.measured_actuation_delay = info.m_actuation_delay
-        if time() - last_print > (1 if not info.m_actuation_delay else .2):
-          print "Info mad=%s target_ts=%s elapsed=%s time_remaining=%s slope=%s intercept=%s %s" % (
-              info.m_actuation_delay, info.target_ts, self.elapsed,
-              self.time_remaining, info.slope, info.intercept,
-              _format_summary(start_ts, info.summary))
-          last_print = time()
-    print "Valve was open for %s seconds." % (time() - self.tare.timestamp)
-    sleep(max(2 * (self.measured_actuation_delay or 0), 1))
+    self.last_readings = self.tare
+    while (self.last_readings.mean <
+            (self.adc_units_to_meter * .8) + self.tare.mean):
+      with robot.OpenValve(self.valve_to_actuate):
+        for info in _wait_until_filled(
+            tare=self.tare,
+            load_cell=robot.load_cell,
+            target_reading=self.target_reading,
+            deadline=self.tare.timestamp + MAX_METER_SECS):
+          self.info = info
+          self.elapsed = time() - self.tare.timestamp
+          self.time_remaining = info.target_ts - time()
+          self.measured_actuation_delay = info.m_actuation_delay
+          if time() - last_print > (1 if not info.m_actuation_delay else .2):
+            print "Info mad=%s target_ts=%s elapsed=%s time_remaining=%s slope=%s intercept=%s %s" % (
+                info.m_actuation_delay, info.target_ts, self.elapsed,
+                self.time_remaining, info.slope, info.intercept,
+                _format_summary(start_ts, info.summary))
+            last_print = time()
+      print "Valve was open for %s seconds." % (time() - self.tare.timestamp)
+      sleep(max(2 * (self.measured_actuation_delay or 0), 1))
+      self.last_readings = robot.load_cell.recent_summary(secs=.3)
+      print "Readings after sleep: %s" % (
+          _format_summary(start_ts, self.last_readings))
 
