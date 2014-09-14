@@ -18,6 +18,7 @@ INGREDIENTS = {
   "agave syrup" : [0, 1, 0, 0],
   "grenadine" : [0, 1, 0, 0],
   "Angostura bitters" : [0, 0, 0, 1],
+  "mezcal" : [1, 0, 0, 0],
 }
 
 
@@ -36,7 +37,8 @@ INGREDIENTS_ORDERED = (
   "simple syrup",
   "agave syrup",
   "grenadine",
-  "Angostura bitters"
+  "Angostura bitters",
+  "mezcal"
 )
 
 def CreateRandomDrink(target_weight):
@@ -71,7 +73,8 @@ def CreateDrink(list_of_ingredients):
 
 
 def CreateTestDrink():
-  return CreateDrink(["agave syrup", "lemon juice", "grenadine"])
+  #return CreateDrink(["agave syrup", "lemon juice", "grenadine"])
+  return CreateDrink(["mezcal", "lemon juice", "grenadine"])
 
 
 def main(args):

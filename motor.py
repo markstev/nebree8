@@ -54,6 +54,8 @@ class StepperMotor(object):
   def Move(self, steps, forward=1, ramp_seconds=0):
     if self.dry_run:
       print "DRY RUN: Moving %d steps in direction: %d" % (steps, forward)
+    else:
+      print "Moving %d steps in direction: %d" % (steps, forward)
     self.io.WriteOutput(io_bank.Outputs.STEPPER_PULSE, 0)
     self.io.WriteOutput(io_bank.Outputs.STEPPER_DIR, forward)
     #gpio.output(pul_pin, 0)

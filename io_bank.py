@@ -43,12 +43,17 @@ class Outputs(enum.Enum):
   VALVE_8 = 1014  # TO VERIFY
   VALVE_9 = 1015  # TO VERIFY
   VALVE_10 = 1008
-  VALVE_11 = 1009
-  VALVE_12 = 1010
+  VALVE_11 = 1010
+  VALVE_12 = 1009
   VALVE_13 = 1011
   VALVE_14 = 1012
   VALVE_15 = 1013 # NOT CONNECTED
 
+  COMPRESSOR_HEAD = 1021
+  COMPRESSOR_VENT = 1022
+  # To pressurize, open head, close vent
+  # For chuck, close head, open vent
+  # For cleanup, open both
   COMPRESSOR = 1023
 
 VALVES = (

@@ -22,6 +22,8 @@ def main(args):
                       help='Name of a drink')
   parser.add_argument('--set_io', type=int, nargs="?", default=0,
                       help='IO pin to set')
+  parser.add_argument('--set_valve', type=int, nargs="?", default=0,
+                      help='IO pin to set')
   parser.add_argument('--set_io_value', type=int, nargs="?", default=0,
                       help='Value to set on the pin.')
   parser.add_argument('--wait_for_falling_io', type=int, nargs="?", default=0,
@@ -32,9 +34,13 @@ def main(args):
                       help='List of positions to move the truck through')
   args = parser.parse_args()
 
-  if args.set_io:
+  if args.set_io or args.set_valve:
     io = io_bank.IOBank()
-    io.WriteOutput(io_bank.Outputs(args.set_io), args.set_io_value)
+    if args.set_io:
+      io.WriteOutput(io_bank.Outputs(args.set_io), args.set_io_value)
+    else:
+      valve_io = io_bank.GetValve(args.set_valve)
+      io.WriteOutput(valve_io, args.set_io_value)
   if args.valve_motor1_direction:
     io = io_bank.IOBank()
     io.WriteOutput(io_bank.Outputs.COMPRESSOR, 1)
@@ -64,7 +70,7 @@ def main(args):
                    PrintCallback)
     while True:
       time.sleep(60)
-  time.sleep(10)
+  time.sleep(2)
 
 if __name__ == "__main__":
   main(sys.argv)

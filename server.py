@@ -12,6 +12,7 @@ from actions.compressor import State
 from actions.home import Home
 from actions.meter import Meter
 from actions.move import Move
+from actions.vent import Vent
 from controller import Controller
 import ingredients
 
@@ -137,6 +138,7 @@ class RobotControlHandler(webapp2.RequestHandler):
             print "%s oz of %s at %f on valve %s" % (wt, ingredient, loc, loc)
             actions.append(Move(-10.5 - 4.0 * (14 - loc)))
             actions.append(Meter(valve_to_actuate=loc, oz_to_meter=(wt * WT_TO_OZ)))
+          actions.append(Home())
           controller.EnqueueGroup(actions)
         elif "fill" in command:
           oz, valve = details.split(",")
@@ -148,6 +150,10 @@ class RobotControlHandler(webapp2.RequestHandler):
         elif "move" in command:
           controller.EnqueueGroup([
               Move(float(details)),
+          ])
+        elif "vent" in command:
+          controller.EnqueueGroup([
+              Vent(),
           ])
         elif "compressor on" in command:
           controller.EnqueueGroup([
