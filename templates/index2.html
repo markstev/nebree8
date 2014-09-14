@@ -59,17 +59,19 @@
   <core-header-panel flex>
     <core-toolbar><div>NE E Bre8</div></core-toolbar>
     <div class="content">
-      <div layout horizontal id="make_all">
+      <div layout horizontal id="make_all" wrap>
         <div layout vertical id="make_common">
           <h3>Common Drinks</h3>
-          <div layout horizontal>
+          <div layout horizontal wrap>
             <command-image-button comm="margarita" src="margarita.jpg"></command-image-button>
             <command-image-button comm="whiskey sour" src="whiskey_sour.jpg"></command-image-button>
+            <command-image-button comm="gin gimlet" src="gin_gimlet.jpg"></command-image-button>
+            <command-image-button comm="old fashioned" src="old_fashioned.jpg"></command-image-button>
           </div>
         </div>
         <div layout vertical id="make_random">
           <h3>Try something crazy</h3>
-          <div layout horizontal>
+          <div layout horizontal wrap>
             <command-image-button comm="spiritous drink" src="old_fashioned.jpg">
               <img class="shuffle-icon" src="shuffle.png">
             </command-image-button>
