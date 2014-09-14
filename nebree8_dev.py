@@ -32,6 +32,8 @@ def main(args):
                       help='Direction to move valve motor1')
   parser.add_argument('--positions', type=float, nargs="+", default=(),
                       help='List of positions to move the truck through')
+  parser.add_argument('--chuck', type=bool, nargs="?", default=False,
+                      help='Run the chuck')
   args = parser.parse_args()
 
   if args.set_io or args.set_valve:
@@ -41,6 +43,12 @@ def main(args):
     else:
       valve_io = io_bank.GetValve(args.set_valve)
       io.WriteOutput(valve_io, args.set_io_value)
+  if args.chuck:
+    print "Chucking"
+    from physical_robot import PhysicalRobot
+    robot = PhysicalRobot()
+    robot.ChuckHoldHeadPressure()
+    time.sleep(3)
   if args.valve_motor1_direction:
     io = io_bank.IOBank()
     io.WriteOutput(io_bank.Outputs.COMPRESSOR, 1)

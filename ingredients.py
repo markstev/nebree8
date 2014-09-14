@@ -4,12 +4,18 @@ import random
 import sys
 
 INGREDIENTS = {
-  "stoli" : [1, 0, 0, 0],
+  #"stoli" : [1, 0, 0, 0],
   "Angostura bitters" : [0, 0, 0, 1],
   #"water one" : [0, 1, 0, 0],
   "water two" : [0, 0, 1, 0],
-  "peppermint schnapps" : [1, 0, 0, 0],
+  #"peppermint schnapps" : [1, 0, 0, 0],
   "creme de cacao" : [0.5, 0.5, 0, 0],
+  "water end" : [0, 0, 1, 0],
+  "water almost end" : [0, 1, 0, 0],
+  "red" : [1, 0, 0, 0],
+  "blue" : [0.5, 0.5, 0, 0],
+  "yellow" : [0, 0, 1, 0],
+  "pink" : [0, 1, 0, 0],
 # "tequila" : [1, 0, 0, 0],
 # "rye" : [1, 0, 0, 0],
 # "bourbon" : [1, 0, 0, 0],
@@ -30,12 +36,12 @@ INGREDIENTS = {
 
 # MUST MAP TO ORDER OF PHYSICAL VALVES
 INGREDIENTS_ORDERED = (
-  "junk",
-  "junk",
-  "junk",
-  "junk",
-  "junk",
-  "junk",
+  "water end",
+  "water almost end",
+  "red",
+  "blue",
+  "yellow",
+  "pink",
   "junk",
   "junk",
   "junk",

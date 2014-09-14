@@ -49,9 +49,9 @@ class Outputs(enum.Enum):
   VALVE_14 = 1012
   VALVE_15 = 1013 # NOT CONNECTED
 
-  CHUCK = 1020
-  COMPRESSOR_HEAD = 1021
-  COMPRESSOR_VENT = 1022
+  CHUCK = 1022
+  COMPRESSOR_HEAD = 1020
+  COMPRESSOR_VENT = 1021
   # To pressurize, open head, close vent
   # For chuck, close head, open vent
   # For cleanup, open both
@@ -85,8 +85,8 @@ class Inputs(enum.Enum):
   LIMIT_SWITCH_POS = 23
   LIMIT_SWITCH_NEG = 24
   
-_SHIFT_REG_REFRESH_RATE = 0.5
-_SHIFT_REG_SLEEP_TIME = 0.001 # 1 ms -> 1khz
+_SHIFT_REG_REFRESH_RATE = 0.1
+_SHIFT_REG_SLEEP_TIME = 0.0001 # 1 ms -> 1khz
 _SHIFT_REG_ADDRESS_OFFSET = 1000
 
 class IOBank(object):

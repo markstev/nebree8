@@ -38,13 +38,16 @@ class StepperMotor(object):
     if not io:
       io = io_bank.IOBank()
     self.io = io
-    self.colliding_positive = False
-    self.colliding_negative = False
+    self.colliding_positive = not self.io.ReadInput(io_bank.Inputs.LIMIT_SWITCH_POS)
+    self.colliding_negative = not self.io.ReadInput(io_bank.Inputs.LIMIT_SWITCH_NEG)
     def HitPositiveRail(channel):
-      self.colliding_positive = True
+      time.sleep(0.0001)
+      self.colliding_positive = not self.io.ReadInput(io_bank.Inputs.LIMIT_SWITCH_POS)
       print "Hit positive rail"
     def HitNegativeRail(channel):
-      self.colliding_negative = True
+      #self.colliding_negative = True
+      time.sleep(0.0001)
+      self.colliding_negative = not self.io.ReadInput(io_bank.Inputs.LIMIT_SWITCH_NEG)
       print "Hit negative rail"
     self.io.AddCallback(io_bank.Inputs.LIMIT_SWITCH_POS, gpio.FALLING,
         HitPositiveRail)
@@ -61,8 +64,9 @@ class StepperMotor(object):
     self.io.WriteOutput(io_bank.Outputs.STEPPER_DIR, forward)
     #gpio.output(pul_pin, 0)
     #gpio.output(dir_pin, forward)
-    current_wait = 0.002
-    final_wait = 0.0005
+    initial_wait = 0.002
+    current_wait = initial_wait
+    final_wait = 0.0002
     # current_wait = 0.001
     # final_wait = 0.001
     for i in range(steps):
@@ -80,9 +84,14 @@ class StepperMotor(object):
         self.colliding_negative = False
       else:
         self.colliding_positive = False
-      if current_wait > final_wait:
-        current_wait *= 0.97
-        pass
+      if steps - i > 600:
+        if current_wait > final_wait:
+          current_wait *= 0.996
+          pass
+      else:
+        if current_wait < initial_wait:
+          current_wait *= 1.004
+          pass
     self.io.WriteOutput(io_bank.Outputs.STEPPER_PULSE, 0)
 
 def InchesToSteps(inches):

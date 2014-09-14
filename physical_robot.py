@@ -20,23 +20,19 @@ class PhysicalRobot(Robot):
     self.load_cell = LoadCellMonitor()
 
   def CalibrateToZero(self):
+    self.ChuckVent()
     self.cannot_interrupt = True
-    time.sleep(0.5)
-    self.Chuck()
     self.rail.CalibrateToZero()
-    self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 1)
     self.cannot_interrupt = False
+    self.PressurizeHead()
+    time.sleep(5)
+    self.CompressorLock()
 
   def MoveToPosition(self, position_in_inches):
     self.cannot_interrupt = True
-    time.sleep(0.5)
-    self.Chuck()
+    self.ChuckHoldHeadPressure()
     self.rail.FillPositions([position_in_inches])
-    self.PressurizeHead()
-    time.sleep(3)
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 1)
-    time.sleep(0.3)
-    self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_HEAD, 0)
     self.cannot_interrupt = False
 
   def PressurizeHead(self):
@@ -51,10 +47,24 @@ class PhysicalRobot(Robot):
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_VENT, 1)
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 1)
 
-  def Chuck(self):
+  def ChuckVent(self):
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_HEAD, 1)
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_VENT, 1)
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 0)
+    self.io.WriteOutput(io_bank.Outputs.CHUCK, 0)
+
+  def ChuckHoldHeadPressure(self):
+    self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_HEAD, 0)
+    self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_VENT, 1)
+    self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 0)
+    self.io.WriteOutput(io_bank.Outputs.CHUCK, 0)
+
+  def CompressorLock(self):
+    self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_HEAD, 0)
+    self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_VENT, 1)
+    self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 1)
+    time.sleep(0.5)
+    self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_VENT, 0)
     self.io.WriteOutput(io_bank.Outputs.CHUCK, 0)
 
   @contextmanager
