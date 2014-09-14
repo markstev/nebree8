@@ -126,6 +126,12 @@ class SkipQueue(webapp2.RequestHandler):
 
 class StaticFileHandler(webapp2.RequestHandler):
     def get(self):
+        if '.svg' in self.request.path:
+            self.response.content_type = 'application/svg+xml'
+        elif '.png' in self.request.path:
+            self.response.content_type = 'image/png'
+        elif '.jpg' in self.request.path:
+            self.response.content_type = 'image/jpg'
         self.response.write(open(self.ToRelativePath(self.request.path)).read())
     def ToRelativePath(self, path):
         if (len(path) > 0 and path[0] == "/"):

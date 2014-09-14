@@ -10,13 +10,14 @@
   <link rel="import" href="control-panel.html">
   <link rel="import" href="load-cell.html">
   <link rel="import" href="robot-status.html">
+  <link href='roboto.css' rel='stylesheet' type='text/css'>
 
   <style>
     html,body {
       height: 100%;
       margin: 0;
       background-color: #fcfcfc;
-      font-family: 'RobotoDraft', sans-serif;
+      font-family: 'Roboto', sans-serif;
       padding: 0;
     }
 
@@ -25,55 +26,63 @@
     }
 
     .content {
-      padding: 1em;
+      padding: 0 1em;
     }
 
-    .graph-container {
-      width: 1000px;
-      height: 500px;
-    }
     command-image-button {
       margin: .5em;
     }
 
     h3 {
-      margin-top: 1em;
+      margin: 1em .5em 0 .5em;
     }
 
     core-header-panel {
       width: 100%;
       height: auto;
     }
+
+    .shuffle-icon {
+      position: absolute;
+      max-width: 50%;
+      max-height: 50%;
+      left: 25%;
+      top: 25%;
+      opacity: 0.7;
+    }
   </style>
 </head>
 <body fullbleed layout vertical>
-  <core-header-panel flex>
-    <core-toolbar><div>NE E Bre8</div></core-toolbar>
     <div class="content">
-      <div layout horizontal id="make_all">
+      <div layout horizontal id="make_all" wrap>
         <div layout vertical id="make_common">
           <h3>Common Drinks</h3>
-          <div layout horizontal>
+          <div layout horizontal wrap>
             <command-image-button comm="margarita" src="margarita.jpg"></command-image-button>
             <command-image-button comm="whiskey sour" src="whiskey_sour.jpg"></command-image-button>
+            <command-image-button comm="gin gimlet" src="gin_gimlet.jpg"></command-image-button>
+            <command-image-button comm="old fashioned" src="old_fashioned.jpg"></command-image-button>
           </div>
         </div>
         <div layout vertical id="make_random">
           <h3>Try something crazy</h3>
-          <div layout horizontal>
-            <command-image-button comm="spiritous drink (randomly generated)"></command-image-button>
-            <command-image-button comm="sour drink (randomly generated)"></command-image-button>
+          <div layout horizontal wrap>
+            <command-image-button comm="spiritous drink" src="old_fashioned.jpg">
+              <img class="shuffle-icon" src="shuffle.png">
+            </command-image-button>
+            <command-image-button comm="sour drink" src="pisco_sour.jpg">
+              <img class="shuffle-icon" src="shuffle.png">
+            </command-image-button>
           </div>
         </div>
       </div>
       <div layout vertical>
         <h3>Machine details</h3>
-        <div layout horizontal>
-          <robot-status></robot-status>
-          <load-cell></load-cell>
+        <div layout horizontal style="padding-left:0.5em;">
+          <robot-status flex one></robot-status>
+          <load-cell flex one></load-cell>
         </div>
       </div>
     </div>
-  </core-header-panel>
 </body>
 </html>

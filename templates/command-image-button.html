@@ -8,7 +8,9 @@
       position: relative;
       width: 200px;
       height: 200px;
-      background-image-size: cover;
+      background-size: cover;
+      -webkit-background-size: cover;
+      -o-background-size: cover;
       background-position: center center;
     }
     paper-button {
@@ -19,6 +21,7 @@
     }
     </style>
     <div layout horizontal id="button" style="background-image: url({{src}})">
+      <content></content>
       <paper-button
         label="{{comm}}"
         on-tap="{{buttonClick}}"
