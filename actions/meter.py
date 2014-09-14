@@ -8,10 +8,10 @@ from collections import namedtuple
 from time import time, sleep
 
 VALVE_ACTUATION_DELAY_SECS = 0.3
-ADC_VALUES_TO_OZ = 42
-MAX_TARE_STDDEV = 2
-TARE_TIMEOUT_SECS = 2
-MAX_METER_SECS = 15
+OZ_TO_ADC_VALUES = 38.35
+MAX_TARE_STDDEV = 2.
+TARE_TIMEOUT_SECS = 2.
+MAX_METER_SECS = 15.
 
 class TareTimeout(ActionException):
   """Thrown when attempt to tare times out"""
@@ -29,6 +29,10 @@ class MeterTimeout(ActionException):
   def __str__(self):
     return ("Failed to meter within %s seconds. Tare=%s, Recent=%s" %
         (MAX_METER_SECS, self.tare, self.recent_readings))
+
+
+def _format_summary(start_ts, s):
+  return 'elapsed=%s mean=%s stddev=%s' % (s.timestamp - start_ts, s.mean, s.stddev)
 
 
 def _tare(robot):
@@ -60,33 +64,37 @@ def _predict_fill_completion(summary, target_reading):
   """
   if summary.mean >= target_reading:
     return 0
-  A = numpy.array([numpy.array([r[0] for r in summary.records]),
-      numpy.ones(len(summary.records))])
+  x = numpy.array([r[0] - summary.timestamp for r in summary.records])
+  A = numpy.vstack([x, numpy.ones(len(x))]).T
   y = numpy.array([r[1] for r in summary.records])
-  w = numpy.linalg.lstsq(A.T, y)[0]
+  w = numpy.linalg.lstsq(A, y)[0]
   target_ts = (target_reading - w[1]) / (w[0])
-  logging.info("target_ts=%s slope=%s intercept=%s", target_ts, w[0], w[1])
-  return target_ts
+  logfn = logging.info
+  if target_ts - time() > 15:
+    logfn = logging.fatal
+    logging.error("readings=%s", summary.records)
+    logging.error("summary=%s", _format_summary(0, summary))
+  logfn("target_ts=%s slope=%s intercept=%s", target_ts, w[0], w[1])
+  
+  return target_ts + summary.timestamp
 
-FillInfo = namedtuple('FillInfo', ['m_actuation_delay', 'target_ts'])
+FillInfo = namedtuple('FillInfo', ['m_actuation_delay', 'target_ts', 'summary'])
 
 def _wait_until_filled(tare, load_cell, target_reading, deadline):
   summary = tare
   target_ts = deadline
   mes_actuation_delay = None
-  now = time()
-  while target_ts - VALVE_ACTUATION_DELAY_SECS > now:
-    yield FillInfo(mes_actuation_delay, target_ts)
+  while target_ts - VALVE_ACTUATION_DELAY_SECS > time():
+    yield FillInfo(mes_actuation_delay, target_ts, summary)
     if time() > deadline:
       raise MeterTimeout(tare=tare, target_ts=target_ts,
           recent_readings=summary,
           complete_readings=load_cell.recent_summary(secs=MAX_METER_SECS))
     sleep(.01)
-    now = time()
-    summary = load_cell.recent_summary(secs=.1)
+    summary = load_cell.recent_summary(secs=.3)
     # Log when readings actually start increasing.
-    if summary.mean > tare.mean + tare.stddev * 2:
-      mes_actuation_delay = now - tare.timestamp
+    if not mes_actuation_delay and summary.mean > tare.mean + tare.stddev * 2:
+      mes_actuation_delay = time() - tare.timestamp
       logging.info("Detected increase in weight after %ss: %s -> %s",
                 mes_actuation_delay, tare, summary)
     target_ts = _predict_fill_completion(summary, target_reading)
@@ -100,14 +108,16 @@ class Meter(Action):
   def __call__(self, robot):
     if self.oz_to_meter == 0:
         logging.warning("oz_to_meter was zero, returning early.")
+    start_ts = time()
     self.tare = _tare(robot)
-    target_reading = self.oz_to_meter / ADC_VALUES_TO_OZ * self.tare.mean
+    self.target_reading = self.oz_to_meter * OZ_TO_ADC_VALUES + self.tare.mean
     with robot.OpenValve(self.valve_to_actuate):
       for info in _wait_until_filled(
           tare=self.tare,
           load_cell=robot.load_cell,
-          target_reading=target_reading,
+          target_reading=self.target_reading,
           deadline=self.tare.timestamp + MAX_METER_SECS):
         self.info = info
         self.elapsed = time() - self.tare.timestamp
         self.time_remaining = info.target_ts - time()
+

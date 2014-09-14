@@ -66,7 +66,8 @@ class InspectQueue(webapp2.RequestHandler):
                 for prop in props.items():
                   content.append('\t%s: %s' % prop)
         self.response.write(GetTemplate('queue.html').format(
-          exception=controller.last_exception, content='\n'.join(content)))
+          exception=controller.last_exception, content='\n'.join(content),
+          robot_dict=robot.__dict__))
 
 
 class RetryQueue(webapp2.RequestHandler):

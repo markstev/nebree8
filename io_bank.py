@@ -146,7 +146,7 @@ class IOBank(object):
       self.__Shift(self.current_shifted_byte)
       try:
         self.signal_refresh.get(True, 1. / _SHIFT_REG_REFRESH_RATE)
-      except:  #Queue.Empty:
+      except Queue.Empty:
         pass # No refresh signals for a while, refresh anyway.
 
   def __SignalRefresh(self):
