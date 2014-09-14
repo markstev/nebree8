@@ -2,6 +2,7 @@
 
 import webapp2
 import BaseHTTPServer
+import json
 import logging
 import re
 import socket
@@ -10,9 +11,11 @@ import time
 from actions.compressor import CompressorToggle
 from actions.compressor import State
 from actions.home import Home
-from actions.meter import Meter
+#from actions.meter import Meter
+from actions.meter_dead_reckoned import MeterDeadReckoned as Meter
 from actions.move import Move
 from actions.vent import Vent
+from actions.wait_for_glass_removal import WaitForGlassRemoval
 from controller import Controller
 import ingredients
 
@@ -52,6 +55,13 @@ class MakeTestDrink(webapp2.RequestHandler):
         ])
         self.response.write("Queued.")
 
+
+class InspectQueueJson(webapp2.RequestHandler):
+    def get(self):
+        """Displays the state of the action queue."""
+        self.response.write(json.dumps({
+          'actions': [action.inspect() for action in controller.InspectQueue()],
+          'exception': controller.last_exception}))
 
 class InspectQueue(webapp2.RequestHandler):
     def get(self):
@@ -124,7 +134,10 @@ class RobotControlHandler(webapp2.RequestHandler):
         elif "drink" in command:
           target_composition = None
           print "DRINK COMMAND: %s" % command
-          if "test" in command:
+          if "test1" in command:
+            print "DRINK COMMAND: %s" % command
+            ingredient_to_wt_loc = ingredients.CreateTestDrink(1)
+          elif "test" in command:
             print "DRINK COMMAND: %s" % command
             ingredient_to_wt_loc = ingredients.CreateTestDrink()
           elif "sour drink" in command:
@@ -139,6 +152,7 @@ class RobotControlHandler(webapp2.RequestHandler):
             actions.append(Move(-10.5 - 4.0 * (14 - loc)))
             actions.append(Meter(valve_to_actuate=loc, oz_to_meter=(wt * WT_TO_OZ)))
           actions.append(Home())
+          actions.append(WaitForGlassRemoval())
           controller.EnqueueGroup(actions)
         elif "fill" in command:
           oz, valve = details.split(",")
@@ -193,6 +207,7 @@ def StartServer(port):
         ('/load_cell', ServeFile('load_cell.html')),
         ('/load_cell.json', LoadCellJson),
         ('/queue', InspectQueue),
+        ('/queue.json', InspectQueueJson),
         ('/queue-retry', RetryQueue),
         ('/queue-clear', ClearQueue),
         ('/queue-skip', SkipQueue),
