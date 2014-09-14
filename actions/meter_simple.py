@@ -14,7 +14,7 @@ class MeterSimple(Action):
     tare = _tare(robot)
     self.target_reading = (tare.mean + OZ_TO_ADC_VALUES * self.oz_to_meter)
     with robot.OpenValve(self.valve_to_actuate):
-      while robot.load_cell.recent_summary(secs=.1).mean < self.target_reading:
+      while robot.load_cell.recent_summary(secs=.2).mean < self.target_reading:
         time.sleep(.05)
     time.sleep(1)
     r = robot.load_cell.recent(secs = time.time() - tare.timestamp + 5)
