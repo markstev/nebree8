@@ -1,0 +1,29 @@
+<link rel="import" href="../bower_components/core-ajax/core-ajax.html">
+
+<polymer-element name="robot-status2">
+  <template>
+    <style>
+    </style>
+    <div id="queueStatus"></div>
+    <core-ajax
+      id="statusAjax"
+      auto
+      url="../queue.json"
+      params='{"command":"{{comm}}", "text":"{{textValue}}"}'
+      handleAs="text"
+      method="GET"
+      on-core-response="{{handleResponse}}">
+    </core-ajax>
+  </template>
+  <script>
+  Polymer("robot-status", {
+    handleResponse: function(event, response) {
+      this.$.queueStatus.innerHTML = response.response
+    },
+    ready: function() {
+      setInterval(function() { this.$.statusAjax.go(); }.bind(this), 100)
+      //this.$.statusAjax.go();
+    }
+  });
+  </script>
+</polymer-element>
