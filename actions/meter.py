@@ -7,9 +7,9 @@ from actions.action import Action, ActionException
 from collections import namedtuple
 from time import time, sleep
 
-VALVE_ACTUATION_DELAY_SECS = 0.3
+VALVE_ACTUATION_DELAY_SECS = 0.5
 OZ_TO_ADC_VALUES = 38.35
-MAX_TARE_STDDEV = 2.
+MAX_TARE_STDDEV = 5.
 TARE_TIMEOUT_SECS = 2.
 MAX_METER_SECS = 15.
 
@@ -91,10 +91,11 @@ def _wait_until_filled(tare, load_cell, target_reading, deadline):
     sleep(.01)
     summary = load_cell.recent_summary(secs=.3)
     # Log when readings actually start increasing.
-    if not mes_actuation_delay and summary.mean > tare.mean + tare.stddev * 2:
+    if not mes_actuation_delay and summary.mean > tare.mean + tare.stddev * 3:
       mes_actuation_delay = time() - tare.timestamp
       logging.info("Detected increase in weight after %ss", mes_actuation_delay)
-    target_ts, slope, intercept = _predict_fill_completion(summary, target_reading)
+    target_ts, slope, intercept = _predict_fill_completion(
+        summary, target_reading)
 
 
 class Meter(Action):
@@ -124,12 +125,12 @@ class Meter(Action):
         self.elapsed = time() - self.tare.timestamp
         self.time_remaining = info.target_ts - time()
         self.measured_actuation_delay = info.m_actuation_delay
-        if time() - last_print > 1:
+        if time() - last_print > (1 if not info.m_actuation_delay else .2):
           print "Info mad=%s target_ts=%s elapsed=%s time_remaining=%s slope=%s intercept=%s %s" % (
               info.m_actuation_delay, info.target_ts, self.elapsed,
               self.time_remaining, info.slope, info.intercept,
               _format_summary(start_ts, info.summary))
           last_print = time()
     print "Valve was open for %s seconds." % (time() - self.tare.timestamp)
-    sleep(max(2 * self.measured_actuation_delay, 1))
+    sleep(max(2 * (self.measured_actuation_delay or 0), 1))
 
