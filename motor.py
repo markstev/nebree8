@@ -62,7 +62,9 @@ class StepperMotor(object):
     #gpio.output(pul_pin, 0)
     #gpio.output(dir_pin, forward)
     current_wait = 0.002
-    final_wait = 0.0002
+    final_wait = 0.0005
+    # current_wait = 0.001
+    # final_wait = 0.001
     for i in range(steps):
       if (not ((self.colliding_positive and forward)
                or (self.colliding_negative and not forward))):
@@ -79,7 +81,7 @@ class StepperMotor(object):
       else:
         self.colliding_positive = False
       if current_wait > final_wait:
-        current_wait *= 0.95
+        current_wait *= 0.97
         pass
     self.io.WriteOutput(io_bank.Outputs.STEPPER_PULSE, 0)
 

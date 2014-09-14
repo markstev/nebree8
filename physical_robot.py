@@ -36,6 +36,7 @@ class PhysicalRobot(Robot):
     self.cannot_interrupt = False
 
   def PressurizeHead(self):
+    print "Pressurize Head"
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_HEAD, 1)
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_VENT, 0)
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 0)
