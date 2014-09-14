@@ -29,7 +29,8 @@ WT_TO_OZ = 1.0
 class CustomJsonEncoder(json.JSONEncoder):
   def default(self, obj):
     if (hasattr(obj, '__class__') and
-        obj.__class__.__name__ in ('ActionException', 'LoadCellMonitor')):
+        obj.__class__.__name__ in ('ActionException', 'LoadCellMonitor',
+            'TareTimeout', 'MeterTimeout')):
       key = '__%s__' % obj.__class__.__name__
       return {key: obj.__dict__}
     return json.JSONEncoder.default(self, obj)
