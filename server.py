@@ -213,7 +213,7 @@ def StartServer(port):
         level=logging.INFO)
     #app = webapp2.WSGIApplication([
     app = PausableWSGIApplication([
-        ('/', ServeFile('index.html')),
+        ('/', ServeFile('index-iframe.html')),
         ('/test_drink', MakeTestDrink),
         ('/load_cell', ServeFile('load_cell.html')),
         ('/load_cell.json', LoadCellJson),
