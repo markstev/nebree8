@@ -113,7 +113,11 @@ def CreateNamedDrink(name):
   if name == "gin gimlet":
     return CreateDrinkWithWeights([("gin", 2.0), ("lime juice", 0.5)])
   if name == "old fashioned":
-    return CreateDrinkWithWeights([("bourbon", 2.0), ("simple syrup", 1.0), ("Angostura bitters", 0.2)])
+    return CreateDrinkWithWeights([("bourbon", 2.0), ("simple syrup", 1.0), ("Angostura bitters", 1.0)])
+
+def CreateTestDrink(n=4):
+  #return CreateDrink(["agave syrup", "lemon juice", "grenadine"])
+  return CreateDrink(["Angostura bitters", "mezcal", "lemon juice", "grenadine"][:n])
 
 
 def main(args):
