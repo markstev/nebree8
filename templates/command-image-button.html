@@ -1,0 +1,58 @@
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/core-ajax/core-ajax.html">
+
+<polymer-element name="command-image-button" comm="{{comm}}" textValue="{{textValue}}" src=="{{src}}">
+  <template>
+    <style>
+    #button {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      background-image-size: cover;
+      background-position: center center;
+    }
+    paper-button {
+      width: 100%;
+      bottom: 0;
+      left: 0;
+      margin: 0;
+    }
+    </style>
+    <div layout horizontal id="button" style="background-image: url({{src}})">
+      <paper-button
+        label="{{comm}}"
+        on-tap="{{buttonClick}}"
+        raisedButton self-end>
+      </paper-button>
+      <span id="reply"</span>
+
+      <core-ajax id="command"
+        auto=false
+        url="../robot-control"
+        params='{"command":"{{comm}}", "text":"{{textValue}}"}'
+        handleAs="json"
+        method="POST"
+        on-core-response="{{handleResponse}}">
+      </core-ajax>
+    </div>
+  </template>
+  <script>
+  Polymer({
+    publish: {
+      comm: {
+        value: "default",
+        reflect: true
+      },
+      src: {
+        reflect: true,
+      }
+    },
+    buttonClick: function(event, detail, sender) {
+      this.$.command.go();
+    },
+    handleResponse: function(event, response) {
+      this.$.reply.innerHTML = response.response;
+    }
+  });
+  </script>
+</polymer-element>
