@@ -10,13 +10,14 @@
   <link rel="import" href="control-panel.html">
   <link rel="import" href="load-cell.html">
   <link rel="import" href="robot-status.html">
+  <link href='roboto.css' rel='stylesheet' type='text/css'>
 
   <style>
     html,body {
       height: 100%;
       margin: 0;
       background-color: #fcfcfc;
-      font-family: 'RobotoDraft', sans-serif;
+      font-family: 'Roboto', sans-serif;
       padding: 0;
     }
 
@@ -25,19 +26,15 @@
     }
 
     .content {
-      padding: 1em;
+      padding: 0 1em;
     }
 
-    .graph-container {
-      width: 1000px;
-      height: 500px;
-    }
     command-image-button {
       margin: .5em;
     }
 
     h3 {
-      margin-top: 1em;
+      margin: 1em .5em 0 .5em;
     }
 
     core-header-panel {
@@ -56,8 +53,6 @@
   </style>
 </head>
 <body fullbleed layout vertical>
-  <core-header-panel flex>
-    <core-toolbar><div>NE E Bre8</div></core-toolbar>
     <div class="content">
       <div layout horizontal id="make_all" wrap>
         <div layout vertical id="make_common">
@@ -89,6 +84,5 @@
         </div>
       </div>
     </div>
-  </core-header-panel>
 </body>
 </html>
