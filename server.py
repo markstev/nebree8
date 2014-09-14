@@ -160,9 +160,9 @@ class RobotControlHandler(webapp2.RequestHandler):
             print "%s oz of %s at %f on valve %s" % (wt, ingredient, loc, loc)
             actions.append(Move(-10.5 - 4.0 * (14 - loc)))
             if 'bitter' in ingredient:
-              actions.append(Meter(valve_to_actuate=loc, oz_to_meter=(wt * WT_TO_OZ)))
-            else:
               actions.append(MeterBitters(valve_to_actuate=loc, drops_to_meter=4))
+            else:
+              actions.append(Meter(valve_to_actuate=loc, oz_to_meter=(wt * WT_TO_OZ)))
           actions.append(Home())
           actions.append(WaitForGlassRemoval())
           controller.EnqueueGroup(actions)

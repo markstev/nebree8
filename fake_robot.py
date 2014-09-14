@@ -28,6 +28,10 @@ class FakeRobot(Robot):
     t.daemon = True
     t.start()
 
+  def __set_load_cell_attrs(self, load_per_second=0, stddev=1):
+    self.load_cell.load_per_second = load_per_second
+    self.load_cell.stddev = stddev
+
   def CalibrateToZero(self):
     self._FakeMove(0)
     
@@ -44,14 +48,16 @@ class FakeRobot(Robot):
     self.valves[valve_no] = True
     self.__check_position(valve_no)
     self.__run_with_delay(
-        .25, lambda: setattr(self.load_cell, 'load_per_second', 10))
+        .25,
+        lambda: self.__set_load_cell_attrs(load_per_second=10, stddev=10))
     yield
     if not self.valves[valve_no]:
       raise ActionException("Valve %s wasn't open!" % valve_no)
     self.__check_position(valve_no)
     self.valves[valve_no] = False
     self.__run_with_delay(
-        .25, lambda: setattr(self.load_cell, 'load_per_second', 0))
+        .25,
+        lambda: self.__set_load_cell_attrs(load_per_second=0, stddev=1))
 
   def ActivateCompressor(self):
     return

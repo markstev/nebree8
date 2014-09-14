@@ -70,9 +70,9 @@ def CreateDrink(list_of_ingredients):
   return ingredient_to_weight
 
 
-def CreateTestDrink(n=3):
+def CreateTestDrink(n=4):
   #return CreateDrink(["agave syrup", "lemon juice", "grenadine"])
-  return CreateDrink(["mezcal", "lemon juice", "grenadine"][:n])
+  return CreateDrink(["Angostura bitters", "mezcal", "lemon juice", "grenadine"][:n])
 
 
 def main(args):
