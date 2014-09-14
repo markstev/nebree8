@@ -40,14 +40,16 @@ class Outputs(enum.Enum):
   VALVE_5 = 1006
   VALVE_7 = 1007
 
-  VALVE_8 = 1015  # TO VERIFY
-  VALVE_9 = 1014  # TO VERIFY
+  VALVE_8 = 1014  # TO VERIFY
+  VALVE_9 = 1015  # TO VERIFY
   VALVE_10 = 1008
   VALVE_11 = 1009
   VALVE_12 = 1010
   VALVE_13 = 1011
   VALVE_14 = 1012
   VALVE_15 = 1013 # NOT CONNECTED
+
+  COMPRESSOR = 1023
 
 VALVES = (
     Outputs.VALVE_0,
@@ -90,7 +92,8 @@ class IOBank(object):
         gpio.setup(output.value, gpio.OUT)
     for pin in Inputs:
       gpio.setup(pin.value, gpio.IN, pull_up_down=gpio.PUD_UP)
-    self.current_shifted_byte = [0] * 16
+    self.current_shifted_byte = [0] * 24
+    self.current_shifted_byte[Outputs.COMPRESSOR.value - 1000] = 1
     self.signal_refresh = Queue.Queue(1)
     self.thread = threading.Thread(target=self.__RefreshShiftOutputs)
     self.thread.daemon = True

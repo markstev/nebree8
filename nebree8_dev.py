@@ -64,7 +64,7 @@ def main(args):
                    PrintCallback)
     while True:
       time.sleep(60)
-  time.sleep(1)
+  time.sleep(10)
 
 if __name__ == "__main__":
   main(sys.argv)
