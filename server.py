@@ -82,7 +82,8 @@ class InspectQueue(webapp2.RequestHandler):
             content.append("Queue is empty")
         else:
             for action in actions:
-                name, props = action.inspect()
+                d = action.inspect()
+                name, props = d['name'], d['args']
                 content.append(name)
                 for prop in props.items():
                   content.append('\t%s: %s' % prop)

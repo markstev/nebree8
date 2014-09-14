@@ -12,13 +12,22 @@
       params='{"command":"{{comm}}", "text":"{{textValue}}"}'
       handleAs="text"
       method="GET"
+      response="{{response}}"
       on-core-response="{{handleResponse}}">
     </core-ajax>
+    <template id='actionTemplate' repeat="{{response.actions}}">
+    </template>
   </template>
   <script>
   Polymer("robot-status", {
+    publish: {
+      data: {
+        value: {},
+        reflect: true
+      }
+    },
     handleResponse: function(event, response) {
-      this.$.queueStatus.innerHTML = response.response
+      this.$.actionTemplate.model.response = response.response;
     },
     ready: function() {
       setInterval(function() { this.$.statusAjax.go(); }.bind(this), 100)
