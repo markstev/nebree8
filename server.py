@@ -24,6 +24,13 @@ controller = None
 
 WT_TO_OZ = 1.0
 
+class CustomJsonEncoder(json.JSONEncoder):
+  def default(self, obj):
+    if (hasattr(obj, '__class__') and
+        obj.__class__.__name__ in ('ActionException', 'LoadCellMonitor')):
+      key = '__%s__' % obj.__class__.__name__
+      return {key: obj.__dict__}
+    return json.JSONEncoder.default(self, obj)
 
 def GetTemplate(filename):
     return open('templates/' + filename).read()
@@ -61,7 +68,7 @@ class InspectQueueJson(webapp2.RequestHandler):
         """Displays the state of the action queue."""
         self.response.write(json.dumps({
           'actions': [action.inspect() for action in controller.InspectQueue()],
-          'exception': controller.last_exception}))
+          'exception': controller.last_exception}, cls=CustomJsonEncoder))
 
 class InspectQueue(webapp2.RequestHandler):
     def get(self):
