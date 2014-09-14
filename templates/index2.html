@@ -1,0 +1,79 @@
+<html>
+<head>
+  <title>N E BRE 8 - Homepage</title>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <script src="../bower_components/platform/platform.js"></script>
+  <link rel="import" href="../bower_components/font-roboto/roboto.html">
+  <link rel="import" href="../bower_components/core-header-panel/core-header-panel.html">
+  <link rel="import" href="../bower_components/core-toolbar/core-toolbar.html">
+  <link rel="import" href="command-image-button.html">
+  <link rel="import" href="control-panel.html">
+  <link rel="import" href="load-cell.html">
+  <link rel="import" href="robot-status.html">
+
+  <style>
+    html,body {
+      height: 100%;
+      margin: 0;
+      background-color: #fcfcfc;
+      font-family: 'RobotoDraft', sans-serif;
+      padding: 0;
+    }
+
+    .container {
+      height: 600px;
+    }
+
+    .content {
+      padding: 1em;
+    }
+
+    .graph-container {
+      width: 1000px;
+      height: 500px;
+    }
+    command-image-button {
+      margin: .5em;
+    }
+
+    h3 {
+      margin-top: 1em;
+    }
+
+    core-header-panel {
+      width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body fullbleed layout vertical>
+  <core-header-panel flex>
+    <core-toolbar><div>NE E Bre8</div></core-toolbar>
+    <div class="content">
+      <div layout horizontal id="make_all">
+        <div layout vertical id="make_common">
+          <h3>Common Drinks</h3>
+          <div layout horizontal>
+            <command-image-button comm="margarita" src="margarita.jpg"></command-image-button>
+            <command-image-button comm="whiskey sour" src="whiskey_sour.jpg"></command-image-button>
+          </div>
+        </div>
+        <div layout vertical id="make_random">
+          <h3>Try something crazy</h3>
+          <div layout horizontal>
+            <command-image-button comm="spiritous drink (randomly generated)"></command-image-button>
+            <command-image-button comm="sour drink (randomly generated)"></command-image-button>
+          </div>
+        </div>
+      </div>
+      <div layout vertical>
+        <h3>Machine details</h3>
+        <div layout horizontal>
+          <robot-status></robot-status>
+          <load-cell></load-cell>
+        </div>
+      </div>
+    </div>
+  </core-header-panel>
+</body>
+</html>
