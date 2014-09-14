@@ -34,7 +34,7 @@ class Controller:
       with self.queue_lock:
         self.current_action = self.queue.popleft()
       try:
-        if isinstance(self.current_action, Move):
+        if self.current_action.sensitive():
           self.app.drop_all = True
         self.current_action(self.robot)
       except ActionException, e:

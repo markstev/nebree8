@@ -6,6 +6,8 @@ class Action(object):
     """Actions processed by the Controller to make drinks."""
     def __call__(self, robot):
         raise NotImplementedError()
+    def sensitive(self):
+        return False
     def inspect(self):
         """Returns a description of this action."""
         return (self.__class__.__name__, self.__dict__)

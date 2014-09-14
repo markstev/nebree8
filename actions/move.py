@@ -9,3 +9,5 @@ class Move(Action):
       self.position_in_inches = position_in_inches
     def __call__(self, robot):
       robot.MoveToPosition(self.position_in_inches)
+    def sensitive(self):
+      return True

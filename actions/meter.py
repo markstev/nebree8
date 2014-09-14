@@ -63,31 +63,27 @@ def _predict_fill_completion(summary, target_reading):
   returns: time as floating point secs since epoch
   """
   if summary.mean >= target_reading:
-    return 0
+    return 0, None, None
   x = numpy.array([r[0] - summary.timestamp for r in summary.records])
   A = numpy.vstack([x, numpy.ones(len(x))]).T
   y = numpy.array([r[1] for r in summary.records])
   w = numpy.linalg.lstsq(A, y)[0]
-  target_ts = (target_reading - w[1]) / (w[0])
-  logfn = logging.info
-  if target_ts - time() > 15:
-    logfn = logging.fatal
-    logging.error("readings=%s", summary.records)
-    logging.error("summary=%s", _format_summary(0, summary))
+  target_ts = (target_reading - w[1]) / (w[0]) + summary.timestamp
   if target_ts < summary.timestamp:  # Slope is negative, probably due to noise.
-    return summary.timestamp + MAX_METER_SECS
-  logfn("target_ts=%s slope=%s intercept=%s", target_ts, w[0], w[1])
+    return summary.timestamp + MAX_METER_SECS, w[0], w[1]
   
-  return target_ts + summary.timestamp
+  return (target_ts, w[0], w[1])
 
-FillInfo = namedtuple('FillInfo', ['m_actuation_delay', 'target_ts', 'summary'])
+FillInfo = namedtuple('FillInfo', ['m_actuation_delay', 'target_ts', 'summary',
+    'slope', 'intercept'])
 
 def _wait_until_filled(tare, load_cell, target_reading, deadline):
   summary = tare
   target_ts = deadline
   mes_actuation_delay = None
+  slope, intercept = None, None
   while target_ts - VALVE_ACTUATION_DELAY_SECS > time():
-    yield FillInfo(mes_actuation_delay, target_ts, summary)
+    yield FillInfo(mes_actuation_delay, target_ts, summary, slope, intercept)
     if time() > deadline:
       raise MeterTimeout(tare=tare, target_ts=target_ts,
           recent_readings=summary,
@@ -97,9 +93,8 @@ def _wait_until_filled(tare, load_cell, target_reading, deadline):
     # Log when readings actually start increasing.
     if not mes_actuation_delay and summary.mean > tare.mean + tare.stddev * 2:
       mes_actuation_delay = time() - tare.timestamp
-      logging.info("Detected increase in weight after %ss: %s -> %s",
-                mes_actuation_delay, tare, summary)
-    target_ts = _predict_fill_completion(summary, target_reading)
+      logging.info("Detected increase in weight after %ss", mes_actuation_delay)
+    target_ts, slope, intercept = _predict_fill_completion(summary, target_reading)
 
 
 class Meter(Action):
@@ -117,6 +112,7 @@ class Meter(Action):
     self.target_reading = self.oz_to_meter * OZ_TO_ADC_VALUES + self.tare.mean
     print "target_reading=%s oz_to_meter=%s self.tare.mean=%s" % (
        self.target_reading, self.oz_to_meter, self.tare.mean)
+    self.measured_actuation_delay = 2.
     last_print = 0
     with robot.OpenValve(self.valve_to_actuate):
       for info in _wait_until_filled(
@@ -127,10 +123,13 @@ class Meter(Action):
         self.info = info
         self.elapsed = time() - self.tare.timestamp
         self.time_remaining = info.target_ts - time()
+        self.measured_actuation_delay = info.m_actuation_delay
         if time() - last_print > 1:
-          print "Info mad=%s elapsed=%s time_remaining=%s %s" % (
-              info.m_actuation_delay, self.elapsed, self.time_remaining,
+          print "Info mad=%s target_ts=%s elapsed=%s time_remaining=%s slope=%s intercept=%s %s" % (
+              info.m_actuation_delay, info.target_ts, self.elapsed,
+              self.time_remaining, info.slope, info.intercept,
               _format_summary(start_ts, info.summary))
           last_print = time()
     print "Valve was open for %s seconds." % (time() - self.tare.timestamp)
+    sleep(max(2 * self.measured_actuation_delay, 1))
 
