@@ -39,21 +39,36 @@
         fill: none;
         stroke: #000;
       }
-      .graph-container {
-        width: 1000px;
-        height: 500px;
+      #graph {
+        width: 100%;
+        height: 200px;
+      }
+
+      svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .stats {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
       }
     </style>
-  <div layout vertical center>
-      <div class="stat">Average: <span id="avg"></span></div>
-      <div class="stat">Standard Deviation: <span id="stddev"></span></div>
-      <div id="graph" class="aGraph" style="position:absolute;top:0px;left:0; float:left;"></div>
+  <div layout vertical left>
+      <div class="stats">
+        <div class="stat">Average: <span id="avg"></span></div>
+        <div class="stat">Standard Deviation: <span id="stddev"></span></div>
+      </div>
+      <div id="graph"></div>
   </div>
   </template>
 
 <script>
   Polymer({
     ready: function() {
+    var that = this;
     var data = [[0, 0], [0, 0]];
     var graph;
     var line;
@@ -62,37 +77,20 @@
     var avg_elt = this.$.avg; // document.getElementById('avg');
     var std_dev_elt = this.$.stddev; // document.getElementById('stddev');
 
-    /* implementation heavily influenced by http://bl.ocks.org/1166403 */
-    
-    // define dimensions of graph
-    var m = [80, 80, 80, 80]; // margins
-    var w = 1000 - m[1] - m[3]; // width
-    var h = 400 - m[0] - m[2]; // height
-    
     // create a simple data array that we'll plot with a line (this array represents only the Y values, X will just be the index location)
     // var data = read in using /load_cell.json
 
     function get_x(tup) { return tup[0]; }
     function get_y(tup) { return tup[1]; }
-
-    var x = d3.scale.linear().domain(d3.extent(data.map(get_x))).range([0, w]);
-    var y = d3.scale.linear().domain(d3.extent(data.map(get_y))).range([h, 0]);
       // automatically determining max range can work something like this
       // var y = d3.scale.linear().domain([0, d3.max(data)]).range([h, 0]);
 
-    // create a line function that can convert data[] into x and y points
-    line = d3.svg.line()
-      // assign the X function to plot our line as we wish
-      .x(function(d,i) { return x(d[0]); })
-      .y(function(d) { return y(d[1]); })
 
       // Add an SVG element with the desired dimensions and margin.
-      var graph = d3.select(this.$.graph).append("svg:svg")
-            .attr("width", w + m[1] + m[3])
-            .attr("height", h + m[0] + m[2])
-          .append("svg:g")
-            .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
+      var graph = d3.select(this.$.graph).append("svg:svg").attr('class', 'svg-elt').
+        append("svg:g");
 
+    /*
       // create yAxis
       var xAxis = d3.svg.axis().scale(x).tickSize(-h).tickSubdivide(true);
       // Add the x-axis.
@@ -109,11 +107,22 @@
             .attr("class", "y-axis")
             .attr("transform", "translate(-25,0)")
             .call(yAxisLeft);
+      graph.select(".y-axis")
+            .attr("transform", "translate(-25,0)")
+            .call(yAxisLeft);
+      graph.select(".x-axis")
+            .attr("transform", "translate(0," + h + ")")
+            .call(xAxis);
+            */
       
       graph.append("svg:path").attr("class", "raw-line");
       graph.append("svg:path").attr("class", "avg-line");
       function refreshData() {
-        d3.json("/load_cell.json", function(error, json) {
+        var after = 0;
+        if (data.length > 0) {
+          after = data[data.length - 1][0]
+        }
+        d3.json("/load_cell.json?after=", function(error, json) {
           window.setTimeout(refreshData, 200);
           if (error) return console.warn(error);
           data = json;
@@ -127,17 +136,20 @@
             var stddev = Math.sqrt(
                 d3.sum(s.map(function(r) { return Math.pow(r[1] - avg, 2); }))
                / (s.length - 1));
-             avg_elt.innerHTML = avg
-             std_dev_elt.innerHTML = stddev;
+             avg_elt.innerHTML = avg.toFixed(2);
+             std_dev_elt.innerHTML = stddev.toFixed(4);
           }
+          var svg_size = that.$.graph.getBoundingClientRect();
+          console.log(svg_size)
+          var w = svg_size.width;
+          var h = svg_size.height;
           x = d3.scale.linear().domain(d3.extent(data.map(get_x))).range([0, w]);
           y = d3.scale.linear().domain(d3.extent(data.map(get_y))).range([h, 0]);
-          graph.select(".y-axis")
-                .attr("transform", "translate(-25,0)")
-                .call(yAxisLeft);
-          graph.select(".x-axis")
-                .attr("transform", "translate(0," + h + ")")
-                .call(xAxis);
+          // create a line function that can convert data[] into x and y points
+          var line = d3.svg.line()
+            // assign the X function to plot our line as we wish
+            .x(function(d,i) { return x(d[0]); })
+            .y(function(d) { return y(d[1]); })
           graph.select(".raw-line")
             .attr("class", "raw-line")
             .attr("d", line(data));
