@@ -4,7 +4,7 @@ import sys
 INGREDIENTS = {
   "stoli" : [1, 0, 0, 0],
   "Angostura bitters" : [0, 0, 0, 1],
-  "water one" : [0, 1, 0, 0],
+  #"water one" : [0, 1, 0, 0],
   "water two" : [0, 0, 1, 0],
   "peppermint schnapps" : [1, 0, 0, 0],
   "creme de cacao" : [0.5, 0.5, 0, 0],
@@ -37,12 +37,12 @@ INGREDIENTS_ORDERED = (
   "junk",
   "junk",
   "junk",
-  "stoli",
-  "Angostura bitters",
-  "water one",
-  "peppermint schnapps" : [1, 0, 0, 0],
   "water two",
   "creme de cacao",
+  "peppermint schnapps",
+  "water one",
+  "Angostura bitters",
+  "stoli",
 # "tequila",
 # "rye",
 # "bourbon",
@@ -64,8 +64,13 @@ def CreateRandomDrink(target_weight):
   """Returns a dict from ingredient to (volume, location)"""
   total_weight = [0, 0, 0, 0]
   ingredient_to_weight = {}
+  attempts = 0
   while total_weight != target_weight:
-    ingredient = random.choice(INGREDIENTS)
+    if attempts > 100:
+      ingredient_to_weight = {}
+      total_weight = [0, 0, 0, 0]
+      attempts = 0
+    ingredient = random.choice(INGREDIENTS.keys())
     ingredient_location = INGREDIENTS_ORDERED.index(ingredient)
     min_gap = 1000
     for target, (x, y) in zip(target_weight,
@@ -78,6 +83,7 @@ def CreateRandomDrink(target_weight):
         min_gap /= 2.0
       ingredient_to_weight[ingredient] = (min_gap, ingredient_location)
       total_weight = [x + y * min_gap for x, y in zip(total_weight, INGREDIENTS[ingredient])]
+    attempts += 1
   return ingredient_to_weight
 
 
@@ -113,7 +119,9 @@ def CreateNamedDrink(name):
   if name == "gin gimlet":
     return CreateDrinkWithWeights([("gin", 2.0), ("lime juice", 0.5)])
   if name == "old fashioned":
-    return CreateDrinkWithWeights([("bourbon", 2.0), ("simple syrup", 1.0), ("Angostura bitters", 1.0)])
+    return CreateDrinkWithWeights([("bourbon", 4.0), ("simple syrup", 1.0), ("Angostura bitters", 1.0)])
+  if name == "daquiri":
+    return CreateDrinkWithWeights([("rum", 2.0), ("simple syrup", 1.0), ("lime juice", 1.0)])
 
 def CreateTestDrink(n=4):
   #return CreateDrink(["agave syrup", "lemon juice", "grenadine"])

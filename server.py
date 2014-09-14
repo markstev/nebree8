@@ -24,7 +24,7 @@ import ingredients
 robot = None
 controller = None
 
-WT_TO_OZ = 1.0
+WT_TO_OZ = 0.375
 
 class CustomJsonEncoder(json.JSONEncoder):
   def default(self, obj):

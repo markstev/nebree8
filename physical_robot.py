@@ -32,7 +32,11 @@ class PhysicalRobot(Robot):
     time.sleep(0.5)
     self.Chuck()
     self.rail.FillPositions([position_in_inches])
+    self.PressurizeHead()
+    time.sleep(3)
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 1)
+    time.sleep(0.3)
+    self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_HEAD, 0)
     self.cannot_interrupt = False
 
   def PressurizeHead(self):
@@ -55,7 +59,7 @@ class PhysicalRobot(Robot):
 
   @contextmanager
   def OpenValve(self, valve_no):
-    self.PressurizeHead()
+    #self.PressurizeHead()
     valve_io = io_bank.GetValve(valve_no)
     self.io.WriteOutput(valve_io, 1)
     print "OPEN VALVE: %d -> %s (wired at %d)" % (valve_no, valve_io, valve_io.value)
