@@ -40,6 +40,7 @@ class PhysicalRobot(Robot):
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_HEAD, 1)
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_VENT, 0)
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 0)
+    self.io.WriteOutput(io_bank.Outputs.CHUCK, 1)
 
   def Vent(self):
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_HEAD, 1)
@@ -50,6 +51,7 @@ class PhysicalRobot(Robot):
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_HEAD, 1)
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_VENT, 1)
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 0)
+    self.io.WriteOutput(io_bank.Outputs.CHUCK, 0)
 
   @contextmanager
   def OpenValve(self, valve_no):

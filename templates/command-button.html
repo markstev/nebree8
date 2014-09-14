@@ -4,6 +4,9 @@
 <polymer-element name="command-button" comm="{{comm}}" textValue="{{textValue}}">
   <template>
     <style>
+      .response {
+        color: "0099FF"
+      }
     </style>
     <div layout horizontal>
       <paper-button
@@ -11,7 +14,7 @@
         on-tap="{{buttonClick}}"
         raisedButton>
       </paper-button>
-      <span id="reply"</span>
+      <span id="reply" class="response"></span>
 
       <core-ajax id="command"
         auto=false

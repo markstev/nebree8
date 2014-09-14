@@ -42,13 +42,14 @@ class Outputs(enum.Enum):
 
   VALVE_8 = 1014  # TO VERIFY
   VALVE_9 = 1015  # TO VERIFY
-  VALVE_10 = 1008
+  VALVE_10 = 1011
   VALVE_11 = 1010
   VALVE_12 = 1009
-  VALVE_13 = 1011
+  VALVE_13 = 1008
   VALVE_14 = 1012
   VALVE_15 = 1013 # NOT CONNECTED
 
+  CHUCK = 1020
   COMPRESSOR_HEAD = 1021
   COMPRESSOR_VENT = 1022
   # To pressurize, open head, close vent
@@ -84,8 +85,8 @@ class Inputs(enum.Enum):
   LIMIT_SWITCH_POS = 23
   LIMIT_SWITCH_NEG = 24
   
-_SHIFT_REG_REFRESH_RATE = 1
-_SHIFT_REG_SLEEP_TIME = 0.1 # 1 ms -> 1khz
+_SHIFT_REG_REFRESH_RATE = 0.5
+_SHIFT_REG_SLEEP_TIME = 0.001 # 1 ms -> 1khz
 _SHIFT_REG_ADDRESS_OFFSET = 1000
 
 class IOBank(object):
@@ -116,6 +117,7 @@ class IOBank(object):
     if output_enum.value < _SHIFT_REG_ADDRESS_OFFSET:
       gpio.output(output_enum.value, value)
     else:
+      print "Update output: %s -> %s" % (output_enum, value)
       # Shift register output.
       # Steps to write:
       # 1: update current shift reg bytes overall

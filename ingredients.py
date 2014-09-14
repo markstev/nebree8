@@ -2,41 +2,62 @@ import random
 import sys
 
 INGREDIENTS = {
-  "tequila" : [1, 0, 0, 0],
-  "rye" : [1, 0, 0, 0],
-  "bourbon" : [1, 0, 0, 0],
-  "gin" : [1, 0, 0, 0],
-  "vodka" : [1, 0, 0, 0],
-  "rum" : [1, 0, 0, 0],
-  "triple sec" : [0.5, 0.5, 0, 0],
-  "coffee liqueur" : [0.5, 0.5, 0, 0],
-  "lime juice" : [0, 0, 1, 0],
-  "lemon juice" : [0, 0, 1, 0],
-  "simple syrup" : [0, 1, 0, 0],
-  "agave syrup" : [0, 1, 0, 0],
-  "grenadine" : [0, 1, 0, 0],
+  "stoli" : [1, 0, 0, 0],
   "Angostura bitters" : [0, 0, 0, 1],
-  "mezcal" : [1, 0, 0, 0],
+  "water one" : [0, 1, 0, 0],
+  "water two" : [0, 0, 1, 0],
+  "peppermint schnapps" : [1, 0, 0, 0],
+  "creme de cacao" : [0.5, 0.5, 0, 0],
+# "tequila" : [1, 0, 0, 0],
+# "rye" : [1, 0, 0, 0],
+# "bourbon" : [1, 0, 0, 0],
+# "gin" : [1, 0, 0, 0],
+# "vodka" : [1, 0, 0, 0],
+# "rum" : [1, 0, 0, 0],
+# "triple sec" : [0.5, 0.5, 0, 0],
+# "coffee liqueur" : [0.5, 0.5, 0, 0],
+# "lime juice" : [0, 0, 1, 0],
+# "lemon juice" : [0, 0, 1, 0],
+# "simple syrup" : [0, 1, 0, 0],
+# "agave syrup" : [0, 1, 0, 0],
+# "grenadine" : [0, 1, 0, 0],
+# "Angostura bitters" : [0, 0, 0, 1],
+# "mezcal" : [1, 0, 0, 0],
 }
 
 
 # MUST MAP TO ORDER OF PHYSICAL VALVES
 INGREDIENTS_ORDERED = (
-  "tequila",
-  "rye",
-  "bourbon",
-  "gin",
-  "vodka",
-  "rum",
-  "triple sec",
-  "coffee liqueur",
-  "lime juice",
-  "lemon juice",
-  "simple syrup",
-  "agave syrup",
-  "grenadine",
+  "junk",
+  "junk",
+  "junk",
+  "junk",
+  "junk",
+  "junk",
+  "junk",
+  "junk",
+  "junk",
+  "stoli",
   "Angostura bitters",
-  "mezcal"
+  "water one",
+  "peppermint schnapps" : [1, 0, 0, 0],
+  "water two",
+  "creme de cacao",
+# "tequila",
+# "rye",
+# "bourbon",
+# "gin",
+# "vodka",
+# "rum",
+# "triple sec",
+# "coffee liqueur",
+# "lime juice",
+# "lemon juice",
+# "simple syrup",
+# "agave syrup",
+# "grenadine",
+# "Angostura bitters",
+# "mezcal"
 )
 
 def CreateRandomDrink(target_weight):
@@ -44,8 +65,8 @@ def CreateRandomDrink(target_weight):
   total_weight = [0, 0, 0, 0]
   ingredient_to_weight = {}
   while total_weight != target_weight:
-    ingredient_location = random.randrange(len(INGREDIENTS_ORDERED))
-    ingredient = INGREDIENTS_ORDERED[ingredient_location]
+    ingredient = random.choice(INGREDIENTS)
+    ingredient_location = INGREDIENTS_ORDERED.index(ingredient)
     min_gap = 1000
     for target, (x, y) in zip(target_weight,
                               zip(INGREDIENTS[ingredient], total_weight)):
@@ -60,19 +81,39 @@ def CreateRandomDrink(target_weight):
   return ingredient_to_weight
 
 
-def CreateDrink(list_of_ingredients):
+def CreateDrinkWithWeights(list_of_ingredients):
   ingredient_to_weight = {}
-  for ingredient in list_of_ingredients:
+  for ingredient, weight in list_of_ingredients:
     try:
-      ingredient_to_weight[ingredient] = (1.0, INGREDIENTS_ORDERED.index(ingredient))
+      ingredient_to_weight[ingredient] = (weight,
+          INGREDIENTS_ORDERED.index(ingredient))
     except:
       print "ERROR: %s is missing" % ingredient
   return ingredient_to_weight
 
 
+def CreateDrink(list_of_ingredients):
+  ingredient_weight_pairs = []
+  for ingredient in list_of_ingredients:
+    ingredient_weight_pairs.append((ingredient, 1.0))
+  return CreateDrinkWithWeights(ingredient_weight_pairs)
+
+
 def CreateTestDrink(n=3):
   #return CreateDrink(["agave syrup", "lemon juice", "grenadine"])
-  return CreateDrink(["mezcal", "lemon juice", "grenadine"][:n])
+  #return CreateDrink(["mezcal", "tequila", "lemon juice"][:n])
+  return CreateDrink(["mezcal", "agave syrup"][:n])
+
+def CreateNamedDrink(name):
+  name = name.lower()
+  if name == "margarita":
+    return CreateDrinkWithWeights([("tequila", 2.0), ("lime juice", 1.0), ("agave syrup", 1.0)])
+  if name == "whiskey sour":
+    return CreateDrinkWithWeights([("rye", 2.0), ("simple syrup", 1.0), ("lemon juice", 1.0)])
+  if name == "gin gimlet":
+    return CreateDrinkWithWeights([("gin", 2.0), ("lime juice", 0.5)])
+  if name == "old fashioned":
+    return CreateDrinkWithWeights([("bourbon", 2.0), ("simple syrup", 1.0), ("Angostura bitters", 0.2)])
 
 
 def main(args):

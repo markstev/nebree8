@@ -156,7 +156,9 @@ class RobotControlHandler(webapp2.RequestHandler):
             target_composition = [4, 1, 0, 1]
             ingredient_to_wt_loc = ingredients.CreateRandomDrink(target_composition)
           actions = []
-          for ingredient, (wt, loc) in ingredient_to_wt_loc.iteritems():
+          ingredient_tuples = [(x, y, z) for x, (y, z) in ingredient_to_wt_loc.iteritems()]
+          ingredient_tuples = sorted(ingredient_tuples, key=lambda x: -x[2])
+          for ingredient, wt, loc in ingredient_tuples:
             print "%s oz of %s at %f on valve %s" % (wt, ingredient, loc, loc)
             actions.append(Move(-10.5 - 4.0 * (14 - loc)))
             if 'bitter' in ingredient:
@@ -167,7 +169,7 @@ class RobotControlHandler(webapp2.RequestHandler):
           actions.append(WaitForGlassRemoval())
           controller.EnqueueGroup(actions)
           self.response.write("Randomized ingredients: %s" %
-              ", ".join(ingredient_to_wt_loc.keys()))
+              ", ".join([x[0] for x in ingredient_tuples]))
           return
         elif "fill" in command:
           oz, valve = details.split(",")
