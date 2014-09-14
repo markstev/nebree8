@@ -3,7 +3,7 @@ import time
 
 from actions.action import Action
 
-SECONDS_PER_OZ = 3
+SECONDS_PER_OZ = 3*.75
 
 class MeterDeadReckoned(Action):
   def __init__(self, valve_to_actuate, oz_to_meter):
@@ -15,6 +15,7 @@ class MeterDeadReckoned(Action):
     t = self.oz_to_meter * SECONDS_PER_OZ
     with robot.OpenValve(self.valve_to_actuate):
       time.sleep(self.oz_to_meter * SECONDS_PER_OZ)
+    time.sleep(1)
     r = robot.load_cell.recent(secs = t + 5)
     f = open('readings_%s_%fs.csv' % (
         time.strftime("%Y%m%d_%H%M%S"), t), 'w')

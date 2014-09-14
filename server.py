@@ -12,7 +12,8 @@ from actions.compressor import CompressorToggle
 from actions.compressor import State
 from actions.home import Home
 #from actions.meter import Meter
-from actions.meter_dead_reckoned import MeterDeadReckoned as Meter
+#from actions.meter_dead_reckoned import MeterDeadReckoned as Meter
+from actions.meter_simple import MeterSimple as Meter
 from actions.move import Move
 from actions.vent import Vent
 from actions.wait_for_glass_removal import WaitForGlassRemoval
