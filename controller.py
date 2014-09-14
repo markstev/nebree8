@@ -7,6 +7,7 @@ import logging
 import os
 
 from actions.action import ActionException
+from actions.move import Move
 
 class Controller:
   def __init__(self, robot):
@@ -33,7 +34,8 @@ class Controller:
       with self.queue_lock:
         self.current_action = self.queue.popleft()
       try:
-        self.app.drop_all = True
+        if isinstance(self.current_action, Move):
+          self.app.drop_all = True
         self.current_action(self.robot)
       except ActionException, e:
         self.last_exception = e
@@ -45,7 +47,7 @@ class Controller:
         raise
       finally:
         self.current_action = None
-      self.app.drop_all = False
+        self.app.drop_all = False
 
   def EnqueueGroup(self, action_group):
     with self.queue_lock:

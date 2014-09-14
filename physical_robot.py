@@ -37,6 +37,7 @@ class PhysicalRobot(Robot):
     time.sleep(5)
     yield
     self.io.WriteOutput(valve_io, 0)
+    print "CLOSE VALVE: %s" % valve_io
 
   def ActivateCompressor(self):
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 0)

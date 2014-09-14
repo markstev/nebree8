@@ -114,8 +114,8 @@
       graph.append("svg:path").attr("class", "avg-line");
       function refreshData() {
         d3.json("/load_cell.json", function(error, json) {
+          window.setTimeout(refreshData, 200);
           if (error) return console.warn(error);
-          console.log("Read " + json.length + " records.");
           data = json;
           var avg_data = data.map(function (_, i) {
             var s = data.slice(i, i + 50);
@@ -143,13 +143,10 @@
             .attr("d", line(data));
           graph.select(".avg-line")
             .attr("d", line(avg_data));
+
         });
       }
-
-      function refreshContinuously() {
-        window.setTimeout(function() { refreshData(); refreshContinuously(); }, 200);
-      }
-      refreshContinuously();
+      refreshData();
     }
   });
 </script>

@@ -74,6 +74,8 @@ def _predict_fill_completion(summary, target_reading):
     logfn = logging.fatal
     logging.error("readings=%s", summary.records)
     logging.error("summary=%s", _format_summary(0, summary))
+  if target_ts < summary.timestamp:  # Slope is negative, probably due to noise.
+    return summary.timestamp + MAX_METER_SECS
   logfn("target_ts=%s slope=%s intercept=%s", target_ts, w[0], w[1])
   
   return target_ts + summary.timestamp
@@ -109,8 +111,13 @@ class Meter(Action):
     if self.oz_to_meter == 0:
         logging.warning("oz_to_meter was zero, returning early.")
     start_ts = time()
+    print "Waiting to tare"
     self.tare = _tare(robot)
+    print "Tared", _format_summary(start_ts, self.tare)
     self.target_reading = self.oz_to_meter * OZ_TO_ADC_VALUES + self.tare.mean
+    print "target_reading=%s oz_to_meter=%s self.tare.mean=%s" % (
+       self.target_reading, self.oz_to_meter, self.tare.mean)
+    last_print = 0
     with robot.OpenValve(self.valve_to_actuate):
       for info in _wait_until_filled(
           tare=self.tare,
@@ -120,4 +127,10 @@ class Meter(Action):
         self.info = info
         self.elapsed = time() - self.tare.timestamp
         self.time_remaining = info.target_ts - time()
+        if time() - last_print > 1:
+          print "Info mad=%s elapsed=%s time_remaining=%s %s" % (
+              info.m_actuation_delay, self.elapsed, self.time_remaining,
+              _format_summary(start_ts, info.summary))
+          last_print = time()
+    print "Valve was open for %s seconds." % (time() - self.tare.timestamp)
 

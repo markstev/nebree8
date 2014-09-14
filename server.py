@@ -69,26 +69,37 @@ class InspectQueue(webapp2.RequestHandler):
           exception=controller.last_exception, content='\n'.join(content),
           robot_dict=robot.__dict__))
 
+META_REFRESH="""
+<html>
+  <head>
+    <title>{msg}</title>
+    <meta http-equiv="refresh" content="2;URL={url}">
+  </head>
+<body>
+{msg}
+</body>
+</html>
+"""
 
 class RetryQueue(webapp2.RequestHandler):
   def post(self):
     if controller.last_exception:
       controller.Retry()
-    self.response.write("Restarted queue")
+    self.response.write(META_REFRESH.format(msg="Retrying...", url="/queue"))
 
 
 class ClearQueue(webapp2.RequestHandler):
   def post(self):
     if controller.last_exception:
       controller.ClearAndResume()
-    self.response.write("Cleared queue")
+    self.response.write(META_REFRESH.format(msg="Cleared...", url="/queue"))
 
 
 class SkipQueue(webapp2.RequestHandler):
   def post(self):
     if controller.last_exception:
       controller.SkipAndResume()
-    self.response.write("Skipped and resumed queue")
+    self.response.write(META_REFRESH.format(msg="Skipped...", url="/queue"))
 
 
 class StaticFileHandler(webapp2.RequestHandler):
@@ -128,7 +139,12 @@ class RobotControlHandler(webapp2.RequestHandler):
             actions.append(Meter(valve_to_actuate=loc, oz_to_meter=(wt * WT_TO_OZ)))
           controller.EnqueueGroup(actions)
         elif "fill" in command:
-          pass
+          oz, valve = details.split(",")
+          oz = float(oz)
+          valve = int(valve)
+          controller.EnqueueGroup([
+              Meter(valve_to_actuate = valve, oz_to_meter = oz),
+          ])
         elif "move" in command:
           controller.EnqueueGroup([
               Move(float(details)),
