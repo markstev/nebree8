@@ -31,7 +31,7 @@ class Outputs(enum.Enum):
   MOTOR_UP_A = 27
   MOTOR_UP_B = 22
 
-  VALVE_0 = 1000
+  VALVE_0 = 1016
   VALVE_1 = 1001
   VALVE_2 = 1002
   VALVE_3 = 1003
@@ -85,12 +85,13 @@ class Inputs(enum.Enum):
   LIMIT_SWITCH_POS = 23
   LIMIT_SWITCH_NEG = 24
   
-_SHIFT_REG_REFRESH_RATE = 0.1
-_SHIFT_REG_SLEEP_TIME = 0.0001 # 1 ms -> 1khz
+_SHIFT_REG_REFRESH_RATE = 100.
+_SHIFT_REG_SLEEP_TIME = 0.0002 # 1 ms -> 1khz
 _SHIFT_REG_ADDRESS_OFFSET = 1000
 
 class IOBank(object):
   def __init__(self):
+    self.last_time = time.time()
     gpio.setmode(gpio.BCM)
     gpio.setwarnings(False)
     for output in Outputs:
@@ -117,19 +118,22 @@ class IOBank(object):
     if output_enum.value < _SHIFT_REG_ADDRESS_OFFSET:
       gpio.output(output_enum.value, value)
     else:
-      print "Update output: %s -> %s" % (output_enum, value)
       # Shift register output.
       # Steps to write:
       # 1: update current shift reg bytes overall
       # 2: set bit, then toggle clock
       shift_register_index = output_enum.value - _SHIFT_REG_ADDRESS_OFFSET
       self.current_shifted_byte[shift_register_index] = value
+      print "Update output: %s -> %s: %s" % (output_enum, value, self.current_shifted_byte)
       self.__SignalRefresh()
 
 
   def __Shift(self, byte):
     SLEEP_TIME = 0.0001
     byte = list(byte)
+    if time.time() - self.last_time > 1.0:
+      print "In __Shift() with bytes: %s" % byte
+      self.last_time = time.time()
     byte.reverse()
     self.WriteOutput(Outputs.SHIFT_REG_RCLOCK, gpio.LOW)
     for bitnum, bit in enumerate(byte):

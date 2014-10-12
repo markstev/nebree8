@@ -4,53 +4,68 @@ import random
 import sys
 
 INGREDIENTS = {
-  #"stoli" : [1, 0, 0, 0],
-  "Angostura bitters" : [0, 0, 0, 1],
-  #"water one" : [0, 1, 0, 0],
-  "water two" : [0, 0, 1, 0],
-  #"peppermint schnapps" : [1, 0, 0, 0],
-  "creme de cacao" : [0.5, 0.5, 0, 0],
-  "water end" : [0, 0, 1, 0],
-  "water almost end" : [0, 1, 0, 0],
-  "red" : [1, 0, 0, 0],
-  "blue" : [0.5, 0.5, 0, 0],
-  "yellow" : [0, 0, 1, 0],
-  "pink" : [0, 1, 0, 0],
-# "tequila" : [1, 0, 0, 0],
-# "rye" : [1, 0, 0, 0],
-# "bourbon" : [1, 0, 0, 0],
-# "gin" : [1, 0, 0, 0],
-# "vodka" : [1, 0, 0, 0],
-# "rum" : [1, 0, 0, 0],
-# "triple sec" : [0.5, 0.5, 0, 0],
-# "coffee liqueur" : [0.5, 0.5, 0, 0],
-# "lime juice" : [0, 0, 1, 0],
-# "lemon juice" : [0, 0, 1, 0],
-# "simple syrup" : [0, 1, 0, 0],
-# "agave syrup" : [0, 1, 0, 0],
-# "grenadine" : [0, 1, 0, 0],
+# #"stoli" : [1, 0, 0, 0],
 # "Angostura bitters" : [0, 0, 0, 1],
-# "mezcal" : [1, 0, 0, 0],
+# #"water one" : [0, 1, 0, 0],
+# "water two" : [0, 0, 1, 0],
+# #"peppermint schnapps" : [1, 0, 0, 0],
+# "creme de cacao" : [0.5, 0.5, 0, 0],
+# "water end" : [0, 0, 1, 0],
+# "water almost end" : [0, 1, 0, 0],
+# "red" : [1, 0, 0, 0],
+# "blue" : [0.5, 0.5, 0, 0],
+# "yellow" : [0, 0, 1, 0],
+# "pink" : [0, 1, 0, 0],
+  "tequila" : [1, 0, 0, 0],
+  "rye" : [1, 0, 0, 0],
+  "bourbon" : [1, 0, 0, 0],
+  "gin" : [1, 0, 0, 0],
+  "vodka" : [1, 0, 0, 0],
+  "rum" : [1, 0, 0, 0],
+  "triple sec" : [0.5, 0.5, 0, 0],
+  "coffee liqueur" : [0.5, 0.5, 0, 0],
+  "lime juice" : [0, 0, 1, 0],
+  "lemon juice" : [0, 0.5, 1, 0],
+  #"simple syrup" : [0, 1, 0, 0],
+  "agave syrup" : [0, 1, 0, 0],
+  "grenadine" : [0, 1, 0, 0],
+  "Angostura bitters" : [0, 0, 0, 1],
+  "frangelico" : [0.5, 0.5, 0, 0],
 }
 
 
 # MUST MAP TO ORDER OF PHYSICAL VALVES
 INGREDIENTS_ORDERED = (
-  "water end",
-  "water almost end",
-  "red",
-  "blue",
-  "yellow",
-  "pink",
-  "junk",
-  "junk",
-  "junk",
-  "water two",
-  "creme de cacao",
-  "peppermint schnapps",
-  "water one",
-  "Angostura bitters",
-  "stoli",
+    "Angostura bitters",
+    "lemon juice",
+    "lime juice",
+    "grenadine", # 3
+    "agave syrup",
+    "simple syrup",
+    "frangelico",
+    "coffee liqueur", #7
+    "triple sec",
+    "tequila",
+    "rye",
+    "bourbon",
+    "gin", # 12
+    "vodka",
+    "rum",
+# "water end",
+# "water almost end",
+# "red",
+# "blue",
+# "yellow",
+# "pink",
+# "junk",
+# "junk",
+# "junk",
+# "water two",
+# "creme de cacao",
+# "peppermint schnapps",
+# "water one",
+# "Angostura bitters",
+# "stoli",
 # "tequila",
 # "rye",
 # "bourbon",
@@ -79,7 +94,14 @@ def CreateRandomDrink(target_weight):
       total_weight = [0, 0, 0, 0]
       attempts = 0
     ingredient = random.choice(INGREDIENTS.keys())
-    ingredient_location = INGREDIENTS_ORDERED.index(ingredient)
+    try:
+      ingredient_location = INGREDIENTS_ORDERED.index(ingredient)
+    except ValueError:
+      print "missing: %s" % ingredient
+      ingredient_to_weight = {}
+      total_weight = [0, 0, 0, 0]
+      attempts = 0
+      continue
     min_gap = 1000
     for target, (x, y) in zip(target_weight,
                               zip(INGREDIENTS[ingredient], total_weight)):
@@ -121,15 +143,18 @@ def CreateTestDrink(n=3):
 def CreateNamedDrink(name):
   name = name.lower()
   if name == "margarita":
-    return CreateDrinkWithWeights([("tequila", 2.0), ("lime juice", 1.0), ("agave syrup", 1.0)])
+    return CreateDrinkWithWeights([("tequila", 2.2), ("lime juice", 1.2), ("agave syrup", 0.55)])
+  if name == "special":
+    return CreateDrinkWithWeights([("vodka", 1.0), ("rye", 1.0), ("lime juice", 1.0), ("agave syrup", 1.0)])
   if name == "whiskey sour":
-    return CreateDrinkWithWeights([("rye", 2.0), ("simple syrup", 1.0), ("lemon juice", 1.0)])
+    return CreateDrinkWithWeights([("rye", 2.0), ("lemon juice", 1.0)])
   if name == "gin gimlet":
     return CreateDrinkWithWeights([("gin", 2.0), ("lime juice", 0.5)])
   if name == "old fashioned":
     return CreateDrinkWithWeights([("bourbon", 4.0), ("simple syrup", 1.0), ("Angostura bitters", 1.0)])
   if name == "daquiri":
     return CreateDrinkWithWeights([("rum", 2.0), ("simple syrup", 1.0), ("lime juice", 1.0)])
+  return False
 
 def CreateTestDrink(n=4):
   #return CreateDrink(["agave syrup", "lemon juice", "grenadine"])
@@ -138,10 +163,10 @@ def CreateTestDrink(n=4):
 
 def PrimeRun():
   return {
-    ingredient: (.1, i) for i, ingredient in enumerate(INGREDIENTS_ORDERED)}
+    ingredient: (1., i) for i, ingredient in enumerate(INGREDIENTS_ORDERED)}
 
 def main(args):
-  target_weight = [4, 1, 0, 1]  # Spiritous
+  target_weight = [3, .7, 0, 1]  # Spiritous
   print CreateRandomDrink(target_weight)
   target_weight = [2, 1, 1, 0]  # Sour
   print CreateRandomDrink(target_weight)

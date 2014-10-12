@@ -19,18 +19,21 @@ class PhysicalRobot(Robot):
     self.rail = RobotRail(motor)
     self.load_cell = LoadCellMonitor()
 
-  def CalibrateToZero(self):
+  def CalibrateToZero(self, carefully=True):
     self.ChuckVent()
     self.cannot_interrupt = True
     self.rail.CalibrateToZero()
     self.cannot_interrupt = False
     self.PressurizeHead()
+    self.io.WriteOutput(io_bank.Outputs.CHUCK, 1)
     time.sleep(5)
     self.CompressorLock()
+    self.io.WriteOutput(io_bank.Outputs.CHUCK, 1)
 
   def MoveToPosition(self, position_in_inches):
     self.cannot_interrupt = True
     self.ChuckHoldHeadPressure()
+    time.sleep(2)
     self.rail.FillPositions([position_in_inches])
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 1)
     self.cannot_interrupt = False
@@ -40,7 +43,7 @@ class PhysicalRobot(Robot):
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_HEAD, 1)
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_VENT, 0)
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR, 0)
-    self.io.WriteOutput(io_bank.Outputs.CHUCK, 1)
+    self.io.WriteOutput(io_bank.Outputs.CHUCK, 0)
 
   def Vent(self):
     self.io.WriteOutput(io_bank.Outputs.COMPRESSOR_HEAD, 1)
@@ -69,12 +72,13 @@ class PhysicalRobot(Robot):
 
   @contextmanager
   def OpenValve(self, valve_no):
-    #self.PressurizeHead()
+    self.PressurizeHead()
     valve_io = io_bank.GetValve(valve_no)
     self.io.WriteOutput(valve_io, 1)
     print "OPEN VALVE: %d -> %s (wired at %d)" % (valve_no, valve_io, valve_io.value)
     yield
     self.io.WriteOutput(valve_io, 0)
+    self.CompressorLock()
     print "CLOSE VALVE: %s" % valve_io
 
   def ActivateCompressor(self):

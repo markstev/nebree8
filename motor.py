@@ -55,7 +55,7 @@ class StepperMotor(object):
         HitNegativeRail)
 
 
-  def Move(self, steps, forward=1, ramp_seconds=0):
+  def Move(self, steps, forward=1, ramp_seconds=0, final_wait=0.0002):
     if self.dry_run:
       print "DRY RUN: Moving %d steps in direction: %d" % (steps, forward)
     else:
@@ -66,7 +66,6 @@ class StepperMotor(object):
     #gpio.output(dir_pin, forward)
     initial_wait = 0.002
     current_wait = initial_wait
-    final_wait = 0.0002
     # current_wait = 0.001
     # final_wait = 0.001
     for i in range(steps):
@@ -110,9 +109,13 @@ class RobotRail(object):
       self.position = position
       print "At position: %f" % position
 
-  def CalibrateToZero(self):
+  def CalibrateToZero(self, carefully=True):
     steps = InchesToSteps(200)
-    self.motor.Move(steps, forward=True)
+    # if not carefully:
+    #   self.FillPositions([0])
+    #   self.motor.Move(InchesToSteps(200), forward=True, final_wait=0.002)
+    # else:
+    self.motor.Move(steps, forward=True, final_wait=0.001)
     self.position = 0
 
   

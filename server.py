@@ -24,7 +24,8 @@ import ingredients
 robot = None
 controller = None
 
-WT_TO_OZ = 0.375
+#WT_TO_OZ = 0.375
+WT_TO_OZ = 0.7
 
 class CustomJsonEncoder(json.JSONEncoder):
   def default(self, obj):
@@ -148,35 +149,37 @@ class RobotControlHandler(webapp2.RequestHandler):
           controller.EnqueueGroup([
               Home(),
           ])
-        elif "drink" in command:
-          target_composition = None
-          print "DRINK COMMAND: %s" % command
-          if "test1" in command:
+        elif "drink" in command or ingredients.CreateNamedDrink(command):
+          ingredient_to_wt_loc = ingredients.CreateNamedDrink(command)
+          if not ingredient_to_wt_loc:
+            target_composition = None
             print "DRINK COMMAND: %s" % command
-            ingredient_to_wt_loc = ingredients.CreateTestDrink(1)
-          elif "test" in command:
-            print "DRINK COMMAND: %s" % command
-            ingredient_to_wt_loc = ingredients.CreateTestDrink()
-          elif "sour drink" in command:
-            target_composition = [2, 1, 1, 0]
-            ingredient_to_wt_loc = ingredients.CreateRandomDrink(target_composition)
-          elif "!!prime" in command:
-            ingredient_to_wt_loc = ingredients.PrimeRun()
-          else:
-            target_composition = [4, 1, 0, 1]
-            ingredient_to_wt_loc = ingredients.CreateRandomDrink(target_composition)
+            if "test1" in command:
+              print "DRINK COMMAND: %s" % command
+              ingredient_to_wt_loc = ingredients.CreateTestDrink(1)
+            elif "test" in command:
+              print "DRINK COMMAND: %s" % command
+              ingredient_to_wt_loc = ingredients.CreateTestDrink()
+            elif "sour drink" in command:
+              target_composition = [2, 1, 1, 0]
+              ingredient_to_wt_loc = ingredients.CreateRandomDrink(target_composition)
+            elif "!!prime" in command:
+              ingredient_to_wt_loc = ingredients.PrimeRun()
+            else:
+              target_composition = [3, 0.7, 0, 1]
+              ingredient_to_wt_loc = ingredients.CreateRandomDrink(target_composition)
           actions = []
           ingredient_tuples = [(x, y, z) for x, (y, z) in ingredient_to_wt_loc.iteritems()]
           ingredient_tuples = sorted(ingredient_tuples, key=lambda x: -x[2])
           for ingredient, wt, loc in ingredient_tuples:
             print "%s oz of %s at %f on valve %s" % (wt, ingredient, loc, loc)
-            actions.append(Move(-10.5 - 4.0 * (14 - loc)))
+            actions.append(Move(-10.25 - 4.0 * (14 - loc)))
             if 'bitter' in ingredient:
               actions.append(MeterBitters(valve_to_actuate=loc, drops_to_meter=6))
             else:
               actions.append(Meter(valve_to_actuate=loc, oz_to_meter=(wt * WT_TO_OZ)))
-          actions.append(Home())
-          actions.append(WaitForGlassRemoval())
+          actions.append(Home(carefully=False))
+          #actions.append(WaitForGlassRemoval())
           controller.EnqueueGroup(actions)
           self.response.write("Randomized ingredients: %s" %
               ", ".join([x[0] for x in ingredient_tuples]))
@@ -204,6 +207,7 @@ class RobotControlHandler(webapp2.RequestHandler):
           controller.EnqueueGroup([
               CompressorToggle(State.OFF)
           ])
+
         self.response.write("ok")
     def get(self):
         print "Shouldn't call get!"
