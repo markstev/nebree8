@@ -31,7 +31,8 @@ class Outputs(enum.Enum):
   MOTOR_UP_A = 27
   MOTOR_UP_B = 22
 
-  VALVE_0 = 1016
+  #VALVE_0 = 1016
+  VALVE_0 = 1000
   VALVE_1 = 1001
   VALVE_2 = 1002
   VALVE_3 = 1003
@@ -85,12 +86,12 @@ class Inputs(enum.Enum):
   LIMIT_SWITCH_POS = 23
   LIMIT_SWITCH_NEG = 24
   
-_SHIFT_REG_REFRESH_RATE = 100.
+_SHIFT_REG_REFRESH_RATE = 1000.
 _SHIFT_REG_SLEEP_TIME = 0.0002 # 1 ms -> 1khz
 _SHIFT_REG_ADDRESS_OFFSET = 1000
 
 class IOBank(object):
-  def __init__(self):
+  def __init__(self, update_shift_reg=True):
     self.last_time = time.time()
     gpio.setmode(gpio.BCM)
     gpio.setwarnings(False)
@@ -99,12 +100,13 @@ class IOBank(object):
         gpio.setup(output.value, gpio.OUT)
     for pin in Inputs:
       gpio.setup(pin.value, gpio.IN, pull_up_down=gpio.PUD_UP)
-    self.current_shifted_byte = [0] * 24
-    self.current_shifted_byte[Outputs.COMPRESSOR.value - 1000] = 1
-    self.signal_refresh = Queue.Queue(1)
-    self.thread = threading.Thread(target=self.__RefreshShiftOutputs)
-    self.thread.daemon = True
-    self.thread.start()
+    if update_shift_reg:
+      self.current_shifted_byte = [0] * 24
+      self.current_shifted_byte[Outputs.COMPRESSOR.value - 1000] = 1
+      self.signal_refresh = Queue.Queue(1)
+      self.thread = threading.Thread(target=self.__RefreshShiftOutputs)
+      self.thread.daemon = True
+      self.thread.start()
     #self.WriteOutput(Outputs.COMPRESSOR, 0)
 
   def ReadInput(self, input_enum):
@@ -145,9 +147,11 @@ class IOBank(object):
       self.WriteOutput(Outputs.SHIFT_REG_CLOCK, gpio.HIGH)
       time.sleep(SLEEP_TIME)
     self.WriteOutput(Outputs.SHIFT_REG_CLOCK, gpio.LOW)  # Reset to a safe state.
-    self.WriteOutput(Outputs.SHIFT_REG_RCLOCK, gpio.LOW)
+    #self.WriteOutput(Outputs.SHIFT_REG_RCLOCK, gpio.LOW)
     #GPIO.output(gpiomap[swallow], GPIO.LOW)
+    time.sleep(SLEEP_TIME)
     self.WriteOutput(Outputs.SHIFT_REG_RCLOCK, gpio.HIGH)
+    time.sleep(SLEEP_TIME)
     self.WriteOutput(Outputs.SHIFT_REG_RCLOCK, gpio.LOW)
     #GPIO.output(gpiomap[swallow], GPIO.HIGH)
 

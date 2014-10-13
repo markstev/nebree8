@@ -178,6 +178,7 @@ class RobotControlHandler(webapp2.RequestHandler):
               actions.append(MeterBitters(valve_to_actuate=loc, drops_to_meter=6))
             else:
               actions.append(Meter(valve_to_actuate=loc, oz_to_meter=(wt * WT_TO_OZ)))
+          actions.append(Move(0.0))
           actions.append(Home(carefully=False))
           #actions.append(WaitForGlassRemoval())
           controller.EnqueueGroup(actions)

@@ -3,6 +3,7 @@
 import RPi.GPIO as gpio
 import argparse
 import io_bank
+import subprocess
 import sys
 import time
 
@@ -32,8 +33,9 @@ def trusty_sleep(n):
   #   pass
 
 class StepperMotor(object):
-  def __init__(self, dry_run=False, io=None):
+  def __init__(self, dry_run=False, io=None, use_separate_process=False):
     self.pulse_state = False
+    self.use_separate_process = use_separate_process
     self.dry_run = dry_run
     if not io:
       io = io_bank.IOBank()
@@ -60,6 +62,15 @@ class StepperMotor(object):
       print "DRY RUN: Moving %d steps in direction: %d" % (steps, forward)
     else:
       print "Moving %d steps in direction: %d" % (steps, forward)
+    if self.use_separate_process:
+      if forward:
+        backward = "False"
+      else:
+        backward = "True"
+      subprocess.call(
+          "sudo nice -n -19 sudo ./motor.py --steps %d --backward=%s" %
+          (steps, backward), shell=True)
+      return
     self.io.WriteOutput(io_bank.Outputs.STEPPER_PULSE, 0)
     self.io.WriteOutput(io_bank.Outputs.STEPPER_DIR, forward)
     #gpio.output(pul_pin, 0)
@@ -118,7 +129,7 @@ class RobotRail(object):
     self.motor.Move(steps, forward=True, final_wait=0.001)
     self.position = 0
 
-  
+
 def main(args):
   parser = argparse.ArgumentParser(description='Move robot stepper motor.')
   parser.add_argument('--steps', type=int, nargs="?", default=1,
@@ -139,7 +150,8 @@ def main(args):
   # http://www.adafruit.com/products/324
   # Driving it with 12v using a delay of 1 microsecond.
   #Setup()
-  motor = StepperMotor(args.dry_run)
+  io = io_bank.IOBank(update_shift_reg=False)
+  motor = StepperMotor(dry_run=args.dry_run, io=io)
   rail = RobotRail(motor)
   if args.positions:
     if args.absolute:

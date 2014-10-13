@@ -15,7 +15,7 @@ class PhysicalRobot(Robot):
   """Implementation of Robot that interfaces with real hardware."""
   def __init__(self):
     self.io = io_bank.IOBank()
-    motor = StepperMotor(io=self.io)  # Not a dry run
+    motor = StepperMotor(io=self.io, use_separate_process=True)  # Not a dry run
     self.rail = RobotRail(motor)
     self.load_cell = LoadCellMonitor()
 
