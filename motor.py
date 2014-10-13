@@ -159,7 +159,7 @@ def main(args):
     rail.FillPositions(args.positions)
     gpio.cleanup()
     return
-  forward = (args.backward != "False")
+  forward = (args.backward != "True")
   if args.inches:
     steps = InchesToSteps(args.inches)
   else:
@@ -169,7 +169,7 @@ def main(args):
   else:
     print "Backward %d steps" % steps
   motor.Move(steps, forward=forward)
-  gpio.cleanup()
+  #gpio.cleanup()
 
 if __name__ == "__main__":
   main(sys.argv)
