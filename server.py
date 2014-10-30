@@ -151,6 +151,8 @@ class RobotControlHandler(webapp2.RequestHandler):
           ])
         elif "drink" in command or ingredients.CreateNamedDrink(command):
           ingredient_to_wt_loc = ingredients.CreateNamedDrink(command)
+          bulk_drinks = []
+          meter_by_time = False
           if not ingredient_to_wt_loc:
             target_composition = None
             print "DRINK COMMAND: %s" % command
@@ -165,25 +167,35 @@ class RobotControlHandler(webapp2.RequestHandler):
               ingredient_to_wt_loc = ingredients.CreateRandomDrink(target_composition)
             elif "!!prime" in command:
               ingredient_to_wt_loc = ingredients.PrimeRun()
+            elif "40 random drinks" in command:
+              target_composition = [2, 1, 1, 0]
+              for unused_i in range(40):
+                drink = ingredients.CreateRandomDrink(target_composition)
+                bulk_drinks.append(drink)
+              meter_by_time = True
             else:
               target_composition = [3, 0.7, 0, 1]
               ingredient_to_wt_loc = ingredients.CreateRandomDrink(target_composition)
-          actions = []
-          ingredient_tuples = [(x, y, z) for x, (y, z) in ingredient_to_wt_loc.iteritems()]
-          ingredient_tuples = sorted(ingredient_tuples, key=lambda x: -x[2])
-          for ingredient, wt, loc in ingredient_tuples:
-            print "%s oz of %s at %f on valve %s" % (wt, ingredient, loc, loc)
-            actions.append(Move(-10.25 - 4.0 * (14 - loc)))
-            if 'bitter' in ingredient:
-              actions.append(MeterBitters(valve_to_actuate=loc, drops_to_meter=6))
-            else:
-              actions.append(Meter(valve_to_actuate=loc, oz_to_meter=(wt * WT_TO_OZ)))
-          actions.append(Move(0.0))
-          actions.append(Home(carefully=False))
-          #actions.append(WaitForGlassRemoval())
-          controller.EnqueueGroup(actions)
-          self.response.write("Randomized ingredients: %s" %
-              ", ".join([x[0] for x in ingredient_tuples]))
+            if not bulk_drinks:
+              bulk_drinks = [ingredient_to_wt_loc]
+          for drink in bulk_drinks:
+            print drink
+            actions = []
+            ingredient_tuples = [(x, y, z) for x, (y, z) in drink.iteritems()]
+            ingredient_tuples = sorted(ingredient_tuples, key=lambda x: -x[2])
+            for ingredient, wt, loc in ingredient_tuples:
+              print "%s oz of %s at %f on valve %s" % (wt, ingredient, loc, loc)
+              actions.append(Move(-10.25 - 4.0 * (14 - loc)))
+              if 'bitter' in ingredient or meter_by_time:
+                actions.append(MeterBitters(valve_to_actuate=loc, drops_to_meter=6))
+              else:
+                actions.append(Meter(valve_to_actuate=loc, oz_to_meter=(wt * WT_TO_OZ)))
+            actions.append(Move(0.0))
+            actions.append(Home(carefully=False))
+            #actions.append(WaitForGlassRemoval())
+            controller.EnqueueGroup(actions)
+            self.response.write("Randomized ingredients: %s" %
+                ", ".join([x[0] for x in ingredient_tuples]))
           return
         elif "fill" in command:
           oz, valve = details.split(",")

@@ -26,9 +26,9 @@ class PhysicalRobot(Robot):
     self.cannot_interrupt = False
     self.PressurizeHead()
     self.io.WriteOutput(io_bank.Outputs.CHUCK, 1)
-    time.sleep(5)
+    # time.sleep(5)
     self.CompressorLock()
-    self.io.WriteOutput(io_bank.Outputs.CHUCK, 1)
+    # self.io.WriteOutput(io_bank.Outputs.CHUCK, 1)
 
   def MoveToPosition(self, position_in_inches):
     self.cannot_interrupt = True

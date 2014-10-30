@@ -126,7 +126,7 @@ class RobotRail(object):
     #   self.FillPositions([0])
     #   self.motor.Move(InchesToSteps(200), forward=True, final_wait=0.002)
     # else:
-    self.motor.Move(steps, forward=True, final_wait=0.001)
+    self.motor.Move(steps, forward=True, final_wait=0.01)
     self.position = 0
 
 
