@@ -67,6 +67,11 @@ class MakeTestDrink(webapp2.RequestHandler):
         self.response.write("Queued.")
 
 
+class DrinkDb(webapp2.RequestHandler):
+  def get(self):
+    pass
+
+
 class InspectQueueJson(webapp2.RequestHandler):
     def get(self):
         """Displays the state of the action queue."""
@@ -252,6 +257,7 @@ def StartServer(port):
         ('/load_cell.json', LoadCellJson),
         ('/queue', InspectQueue),
         ('/queue.json', InspectQueueJson),
+        ('/drinks.js', DrinkDb),
         ('/queue-retry', RetryQueue),
         ('/queue-clear', ClearQueue),
         ('/queue-skip', SkipQueue),
