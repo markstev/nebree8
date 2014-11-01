@@ -159,8 +159,14 @@ class IOBank(object):
     #GPIO.output(gpiomap[swallow], GPIO.HIGH)
 
   def __RefreshShiftOutputs(self):
+    old_compressor = 1
+    new_compressor = 1
     while True:
       self.__Shift(self.current_shifted_byte)
+      new_compressor = self.current_shifted_byte[Outputs.COMPRESSOR.value - 1000]
+      if old_compressor != new_compressor:
+        time.sleep(0.5)
+      old_compressor = new_compressor
       try:
         self.signal_refresh.get(True, 1. / _SHIFT_REG_REFRESH_RATE)
       except Queue.Empty:

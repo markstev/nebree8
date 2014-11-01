@@ -104,6 +104,7 @@ def CreateDrinkWithWeights(list_of_ingredients):
     except:
       print "ERROR: %s is missing" % ingredient
       return False
+  print "CreateDrinkWithWeights: ingredient_to_weight=", ingredient_to_weight
   return ingredient_to_weight
 
 
@@ -121,21 +122,11 @@ def CreateTestDrink(n=3):
 
 def CreateNamedDrink(name):
   name = name.lower()
-  if name == "margarita":
-    return CreateDrinkWithWeights([("tequila", 2.2), ("lime juice", 1.2), ("agave syrup", 0.55)])
   if name == "special":
     return CreateDrinkWithWeights([("vodka", 1.0), ("rye", 1.0), ("lime juice", 1.0), ("agave syrup", 1.0)])
-  if name == "whiskey sour":
-    return CreateDrinkWithWeights([("rye", 2.0), ("lemon juice", 1.0)])
-  if name == "gin gimlet":
-    return CreateDrinkWithWeights([("gin", 2.0), ("lime juice", 0.5)])
-  if name == "old fashioned":
-    return CreateDrinkWithWeights([("bourbon", 4.0), ("simple syrup", 1.0), ("angostura bitters", 1.0)])
-  if name == "daquiri":
-    return CreateDrinkWithWeights([("rum", 2.0), ("simple syrup", 1.0), ("lime juice", 1.0)])
 
   for recipe in manual_db.db:
-    if recipe.name.lower() == name:
+    if recipe.name.lower() == name.lower():
       ingredients = [
           (i.name.lower(), i.qty.oz) for i in recipe.ingredients]
       return CreateDrinkWithWeights(ingredients)
