@@ -38,51 +38,21 @@ INGREDIENTS = {
 
 # MUST MAP TO ORDER OF PHYSICAL VALVES
 INGREDIENTS_ORDERED = (
-    "Angostura bitters",
-    "lemon juice",
+    "angostura bitters",
     "lime juice",
-    "grenadine", # 3
-    "agave syrup",
-    "simple syrup",
-    "frangelico",
-    "coffee liqueur", #7
+    "lemon juice",
+    "", # brown bottle dark liquid
+    "", # clear bottle amber liquid
+    "simple syrup", # 3
+    "kahlua",
+    "pimms",
     "triple sec",
     "tequila",
+    "tanqueray",
+    "rum",
     "rye",
     "bourbon",
-    "gin", # 12
     "vodka",
-    "rum",
-# "water end",
-# "water almost end",
-# "red",
-# "blue",
-# "yellow",
-# "pink",
-# "junk",
-# "junk",
-# "junk",
-# "water two",
-# "creme de cacao",
-# "peppermint schnapps",
-# "water one",
-# "Angostura bitters",
-# "stoli",
-# "tequila",
-# "rye",
-# "bourbon",
-# "gin",
-# "vodka",
-# "rum",
-# "triple sec",
-# "coffee liqueur",
-# "lime juice",
-# "lemon juice",
-# "simple syrup",
-# "agave syrup",
-# "grenadine",
-# "Angostura bitters",
-# "mezcal"
 )
 
 def CreateRandomDrink(target_weight):
