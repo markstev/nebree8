@@ -46,7 +46,7 @@ class Parts(Unit):
 
 db = [
     Recipe(
-        name = 'Margarita (with Agave)',
+        name = 'Margarita',
         ingredients = [
             Ingredient(Oz(2.2), 'Tequila'),
             Ingredient(Oz(1.2), 'Lime Juice'),
