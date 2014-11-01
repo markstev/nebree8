@@ -8,6 +8,7 @@ import re
 import socket
 import time
 
+import manual_db
 from actions.compressor import CompressorToggle
 from actions.compressor import State
 from actions.home import Home
@@ -69,7 +70,8 @@ class MakeTestDrink(webapp2.RequestHandler):
 
 class DrinkDb(webapp2.RequestHandler):
   def get(self):
-    pass
+    self.response.write("db = ['%s'];" % "','".join(
+      r.name for r in manual_db.db))
 
 
 class InspectQueueJson(webapp2.RequestHandler):

@@ -1,0 +1,21 @@
+<link rel="import" href="command-image-button.html">
+
+<polymer-element name="drink-db" db="{{db}}">
+  <template>
+    <template repeat="{{recipe in db}}">
+      {{recipe}}
+      <command-image-button comm="{{recipe.name}}" src="{{recipe.src}}">
+      </command-image-button>
+    </template>
+  </template>
+  <script>
+  Polymer('drink-db', {
+    publish: {
+      db: {
+        value: [],
+        reflect: true
+      }
+    }
+  });
+  </script>
+</polymer-element>

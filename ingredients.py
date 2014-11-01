@@ -3,6 +3,8 @@
 import random
 import sys
 
+import manual_db
+
 INGREDIENTS = {
 # #"stoli" : [1, 0, 0, 0],
 # "Angostura bitters" : [0, 0, 0, 1],
@@ -118,6 +120,9 @@ def CreateRandomDrink(target_weight):
 
 
 def CreateDrinkWithWeights(list_of_ingredients):
+  print '--Making drink with recipe--'
+  print '\n'.join('% 5.2foz %s' % (i[1], i[0]) for i in list_of_ingredients)
+  print
   ingredient_to_weight = {}
   for ingredient, weight in list_of_ingredients:
     try:
@@ -125,6 +130,7 @@ def CreateDrinkWithWeights(list_of_ingredients):
           INGREDIENTS_ORDERED.index(ingredient))
     except:
       print "ERROR: %s is missing" % ingredient
+      return False
   return ingredient_to_weight
 
 
@@ -154,6 +160,12 @@ def CreateNamedDrink(name):
     return CreateDrinkWithWeights([("bourbon", 4.0), ("simple syrup", 1.0), ("Angostura bitters", 1.0)])
   if name == "daquiri":
     return CreateDrinkWithWeights([("rum", 2.0), ("simple syrup", 1.0), ("lime juice", 1.0)])
+
+  for recipe in manual_db.db:
+    if recipe.name.lower() == name:
+      ingredients = [
+          (i.name.lower(), i.qty.oz) for i in recipe.ingredients]
+      return CreateDrinkWithWeights(ingredients)
   return False
 
 def CreateTestDrink(n=4):

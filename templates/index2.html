@@ -3,11 +3,13 @@
   <title>N E BRE 8 - Homepage</title>
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
   <script src="../bower_components/platform/platform.js"></script>
+  <script src="/drinks.js"></script>
   <link rel="import" href="../bower_components/font-roboto/roboto.html">
   <link rel="import" href="../bower_components/core-header-panel/core-header-panel.html">
   <link rel="import" href="../bower_components/core-toolbar/core-toolbar.html">
   <link rel="import" href="command-image-button.html">
   <link rel="import" href="control-panel.html">
+  <link rel="import" href="drink-db.html">
   <link rel="import" href="load-cell.html">
   <link rel="import" href="robot-status.html">
   <link href='roboto.css' rel='stylesheet' type='text/css'>
@@ -67,20 +69,37 @@
         <div layout vertical id="make_random">
           <h3>Try something crazy</h3>
           <div layout horizontal wrap>
-            <command-image-button comm="spiritous drink" src="old_fashioned.jpg">
-              <img class="shuffle-icon" src="shuffle.png">
+            <command-image-button comm="spiritous drink" src="random_spiritous.jpg">
             </command-image-button>
-            <command-image-button comm="sour drink" src="pisco_sour.jpg">
-              <img class="shuffle-icon" src="shuffle.png">
+            <command-image-button comm="sour drink" src="random_sour.jpg">
             </command-image-button>
           </div>
+        </div>
+        <div layout vertical id="beta">
+          <h3>Beta</h3>
+          <div layout horizontal wrap>
+        <command-image-button comm='Margarita (with Agave)' src="margarita.jpg"></command-image-button>
+        <command-image-button comm='Old Fashioned' src="old_fashioned.jpg"></command-image-button>
+        <command-image-button comm='Daquiri' src="daquiri.jpg"></command-image-button>
+        <command-image-button comm='Gin Gimlet' src="gin_gimlet.jpg"></command-image-button>
+        <command-image-button comm='Whiskey Sour' src="whiskey_sour.jpg"></command-image-button>
+        <command-image-button comm='Pimms Cup' src="pimms_cup.jpg"></command-image-button>
+        <command-image-button comm='Kamikaze' src="kamikaze.jpg"></command-image-button>
+        <command-image-button comm='Lemon Drop' src="lemon_drop.jpg"></command-image-button>
+        <command-image-button comm='Long Island Ice Tea' src="long_island_ice_tea.jpg"></command-image-button>
+        <command-image-button comm='Tom Collins' src="http://tummyrumblr.com/wp-content/uploads/2012/11/tumblr_lm0zd8FMys1qztega.jpg"></command-image-button>
+        <command-image-button comm='Virgin Lemonade' src="lemonade.jpg"></command-image-button>
+        <command-image-button comm='Grenadine Punch' src="punch.jpg"></command-image-button>
+      </div>
         </div>
       </div>
       <div layout vertical>
         <h3>Machine details</h3>
         <div layout horizontal style="padding-left:0.5em;">
+          <!--
           <robot-status flex one></robot-status>
           <load-cell flex one></load-cell>
+          -->
         </div>
       </div>
     </div>
