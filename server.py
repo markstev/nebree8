@@ -120,8 +120,7 @@ class RetryQueue(webapp2.RequestHandler):
 
 class ClearQueue(webapp2.RequestHandler):
   def post(self):
-    if controller.last_exception:
-      controller.ClearAndResume()
+    controller.ClearAndResume()
     self.response.write(META_REFRESH.format(msg="Cleared...", url="/queue"))
 
 

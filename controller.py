@@ -71,6 +71,7 @@ class Controller:
 
   def ClearAndResume(self):
     print "Clearing queue"
+    while self.queued_sem.acquire(False): pass
     self.queue.clear()
     self.__Resume()
 
