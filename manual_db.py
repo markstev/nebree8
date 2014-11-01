@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 class Recipe(object):
     def __init__(self, name, ingredients, total_oz = None):
@@ -47,10 +48,11 @@ class Parts(Unit):
 db = [
     Recipe(
         name = 'Margarita',
+        total_oz = 2.75,
         ingredients = [
-            Ingredient(Oz(2.2), 'Tequila'),
-            Ingredient(Oz(1.2), 'Lime Juice'),
-            Ingredient(Oz(0.55), 'Agave Syrup')]),
+            Ingredient(Parts(2), 'Tequila'),
+            Ingredient(Parts(1), 'Lime Juice'),
+            Ingredient(Parts(1), 'Agave Syrup')]),
     Recipe(
         name = 'Old Fashioned',
         total_oz = 3,
