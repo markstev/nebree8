@@ -1,4 +1,5 @@
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
 <link rel="import" href="../bower_components/core-ajax/core-ajax.html">
 
 <polymer-element name="command-image-button" comm="{{comm}}" textValue="{{textValue}}" src=="{{src}}">
@@ -13,6 +14,17 @@
       -o-background-size: cover;
       background-position: center center;
     }
+    #label {
+      position: absolute;
+      width: 100%;
+      height: auto;
+      left: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, .7);
+      text-transform: capitalize;
+      padding: .5em;
+      box-sizing: border-box;
+    }
     paper-button {
       width: 100%;
       bottom: 0;
@@ -20,13 +32,12 @@
       margin: 0;
     }
     </style>
-    <div layout horizontal id="button" style="background-image: url({{src}})">
-      <content></content>
-      <paper-button
-        label="{{comm}}"
+    <div layout horizontal id="button"
         on-tap="{{buttonClick}}"
-        raisedButton self-end>
-      </paper-button>
+      style="background-image: url({{src}})">
+      <paper-ripple fit></paper-ripple>
+      <content></content>
+      <div id="label">{{comm}}</div>
       <span id="reply"</span>
 
       <core-ajax id="command"
