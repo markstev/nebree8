@@ -17,7 +17,7 @@
     html,body {
       height: 100%;
       margin: 0;
-      background-color: #fcfcfc;
+      background-color: #666;
       font-family: 'Roboto', sans-serif;
       padding: 0;
     }
@@ -56,6 +56,7 @@
 <body fullbleed layout vertical>
     <div class="content">
       <div layout horizontal id="make_all" wrap>
+        <!--
         <div layout vertical id="make_common">
           <h3>Common Drinks</h3>
           <div layout horizontal wrap>
@@ -65,8 +66,8 @@
             <command-image-button comm="old fashioned" src="old_fashioned.jpg"></command-image-button>
           </div>
         </div>
+        -->
         <div layout vertical id="make_random">
-          <h3>Try something crazy</h3>
           <div layout horizontal wrap>
             <command-image-button comm="spiritous drink" src="random_spiritous.jpg">
             </command-image-button>
@@ -75,13 +76,12 @@
           </div>
         </div>
         <div layout vertical id="beta">
-          <h3>Beta</h3>
           <div layout horizontal wrap>
         <command-image-button comm='Margarita' src="margarita.jpg"></command-image-button>
+        <command-image-button comm='Whiskey Sour' src="whiskey_sour.jpg"></command-image-button>
+        <command-image-button comm='Gin Gimlet' src="gin_gimlet.jpg"></command-image-button>
         <command-image-button comm='Old Fashioned' src="old_fashioned.jpg"></command-image-button>
         <command-image-button comm='Daquiri' src="daquiri.jpg"></command-image-button>
-        <command-image-button comm='Gin Gimlet' src="gin_gimlet.jpg"></command-image-button>
-        <command-image-button comm='Whiskey Sour' src="whiskey_sour.jpg"></command-image-button>
         <command-image-button comm='Pimms Cup' src="pimms_cup.jpg"></command-image-button>
         <command-image-button comm='Kamikaze' src="kamikaze.jpg"></command-image-button>
         <command-image-button comm='Lemon Drop' src="lemon_drop.jpg"></command-image-button>
