@@ -41,14 +41,14 @@ INGREDIENTS_ORDERED = (
     "angostura bitters",
     "lime juice",
     "lemon juice",
-    "", # brown bottle dark liquid
-    "", # clear bottle amber liquid
-    "simple syrup", # 3
+    "grenadine", # brown bottle dark liquid
+    "agave syrup", # clear bottle amber liquid
+    "simple syrup",
     "kahlua",
     "pimms",
     "triple sec",
     "tequila",
-    "tanqueray",
+    "gin",
     "rum",
     "rye",
     "bourbon",
@@ -67,7 +67,7 @@ def CreateRandomDrink(target_weight):
       attempts = 0
     ingredient = random.choice(INGREDIENTS.keys())
     try:
-      ingredient_location = INGREDIENTS_ORDERED.index(ingredient)
+      ingredient_location = INGREDIENTS_ORDERED.index(ingredient.lower())
     except ValueError:
       print "missing: %s" % ingredient
       ingredient_to_weight = {}
