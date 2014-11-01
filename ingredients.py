@@ -28,11 +28,15 @@ INGREDIENTS = {
   "coffee liqueur" : [0.5, 0.5, 0, 0],
   "lime juice" : [0, 0, 1, 0],
   "lemon juice" : [0, 0.5, 1, 0],
-  #"simple syrup" : [0, 1, 0, 0],
+  "simple syrup" : [0, 1, 0, 0],
   "agave syrup" : [0, 1, 0, 0],
   "grenadine" : [0, 1, 0, 0],
-  "Angostura bitters" : [0, 0, 0, 1],
+  "angostura bitters" : [0, 0, 0, 1],
   "frangelico" : [0.5, 0.5, 0, 0],
+  "coffee liqueur" : [0.5, 0.5, 0, 0],
+  "lime juice" : [0, 0, 1, 0],
+  "kahlua" : [0.5, 0.5, 0, 0],
+  "pimms" : [0.5, 0.5, 0, 0],
 }
 
 
@@ -60,20 +64,19 @@ def CreateRandomDrink(target_weight):
   total_weight = [0, 0, 0, 0]
   ingredient_to_weight = {}
   attempts = 0
+  FILTERED_INGREDIENTS = {}
+  for i in INGREDIENTS_ORDERED:
+    if i not in INGREDIENTS:
+      print "No random config for", i
+    else:
+      FILTERED_INGREDIENTS[i] = INGREDIENTS[i]
   while total_weight != target_weight:
     if attempts > 100:
       ingredient_to_weight = {}
       total_weight = [0, 0, 0, 0]
       attempts = 0
-    ingredient = random.choice(INGREDIENTS.keys())
-    try:
-      ingredient_location = INGREDIENTS_ORDERED.index(ingredient.lower())
-    except ValueError:
-      print "missing: %s" % ingredient
-      ingredient_to_weight = {}
-      total_weight = [0, 0, 0, 0]
-      attempts = 0
-      continue
+    ingredient = random.choice(FILTERED_INGREDIENTS.keys())
+    ingredient_location = INGREDIENTS_ORDERED.index(ingredient.lower())
     min_gap = 1000
     for target, (x, y) in zip(target_weight,
                               zip(INGREDIENTS[ingredient], total_weight)):
@@ -127,7 +130,7 @@ def CreateNamedDrink(name):
   if name == "gin gimlet":
     return CreateDrinkWithWeights([("gin", 2.0), ("lime juice", 0.5)])
   if name == "old fashioned":
-    return CreateDrinkWithWeights([("bourbon", 4.0), ("simple syrup", 1.0), ("Angostura bitters", 1.0)])
+    return CreateDrinkWithWeights([("bourbon", 4.0), ("simple syrup", 1.0), ("angostura bitters", 1.0)])
   if name == "daquiri":
     return CreateDrinkWithWeights([("rum", 2.0), ("simple syrup", 1.0), ("lime juice", 1.0)])
 
