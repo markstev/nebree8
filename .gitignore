@@ -51,3 +51,8 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
+bower_components/
+.RData
+.Rhistory
+
+*.swp
