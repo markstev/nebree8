@@ -4,7 +4,7 @@ import time
 import io_bank
 from robot import Robot
 from parts.load_cell import LoadCellMonitor
-from motor import StepperMotor, RobotRail
+from parts.motor import StepperMotor, RobotRail
 
 
 def IngredientToValve(ingredient_index):

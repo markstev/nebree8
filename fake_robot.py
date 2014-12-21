@@ -32,7 +32,7 @@ class FakeRobot(Robot):
     self.load_cell.load_per_second = load_per_second
     self.load_cell.stddev = stddev
 
-  def CalibrateToZero(self):
+  def CalibrateToZero(self, carefully=False):
     self._FakeMove(0)
     
   def MoveToPosition(self, position_in_inches):

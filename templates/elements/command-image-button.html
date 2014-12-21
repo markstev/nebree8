@@ -1,8 +1,9 @@
-<link rel="import" href="../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
-<link rel="import" href="../bower_components/core-ajax/core-ajax.html">
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="/bower_components/paper-button/paper-button.html">
+<link rel="import" href="/bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="/bower_components/core-ajax/core-ajax.html">
 
-<polymer-element name="command-image-button" comm="{{comm}}" textValue="{{textValue}}" src=="{{src}}">
+<polymer-element name="command-image-button" attributes="url text src">
   <template>
     <style>
     #button {
@@ -37,13 +38,12 @@
       style="background-image: url({{src}})">
       <paper-ripple fit></paper-ripple>
       <content></content>
-      <div id="label">{{comm}}</div>
+      <div id="label">{{text}}</div>
       <span id="reply"</span>
 
       <core-ajax id="command"
         auto=false
-        url="../robot-control"
-        params='{"command":"{{comm}}", "text":"{{textValue}}"}'
+        url="{{url}}"
         handleAs="json"
         method="POST"
         on-core-response="{{handleResponse}}">
@@ -52,15 +52,6 @@
   </template>
   <script>
   Polymer({
-    publish: {
-      comm: {
-        value: "default",
-        reflect: true
-      },
-      src: {
-        reflect: true,
-      }
-    },
     buttonClick: function(event, detail, sender) {
       this.$.command.go();
     },

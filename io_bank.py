@@ -32,7 +32,6 @@ class Outputs(enum.Enum):
   MOTOR_UP_B = 22
 
   VALVE_0 = 1019
-  #VALVE_0 = 1000
   VALVE_1 = 1001
   VALVE_2 = 1002
   VALVE_3 = 1003

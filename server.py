@@ -8,7 +8,6 @@ import re
 import socket
 import time
 
-import manual_db
 from actions.compressor import CompressorToggle
 from actions.compressor import State
 from actions.home import Home
@@ -20,13 +19,12 @@ from actions.move import Move
 from actions.vent import Vent
 from actions.wait_for_glass_removal import WaitForGlassRemoval
 from controller import Controller
-import ingredients
+from config import ingredients
+from drinks import manual_db
+from drinks.random_drinks import RandomSourDrink, RandomSpirituousDrink
 
 robot = None
 controller = None
-
-#WT_TO_OZ = 0.375
-WT_TO_OZ = 0.7
 
 class CustomJsonEncoder(json.JSONEncoder):
   def default(self, obj):
@@ -56,20 +54,9 @@ class LoadCellJson(webapp2.RequestHandler):
         self.response.write("]")
 
 
-class MakeTestDrink(webapp2.RequestHandler):
-    def get(self):  # TODO: Switch to post.
-        controller.EnqueueGroup([
-            Home(),
-            Move(5),
-            Meter(valve_to_actuate=1, oz_to_meter=1),
-            Move(10),
-            Meter(valve_to_actuate=2, oz_to_meter=2),
-        ])
-        self.response.write("Queued.")
-
-
-class DrinkDb(webapp2.RequestHandler):
+class DrinkDbHandler(webapp2.RequestHandler):
   def get(self):
+    self.response.content_type = 'application/javascript'
     self.response.write("db = ['%s'];" % "','".join(
       r.name for r in manual_db.db))
 
@@ -132,6 +119,7 @@ class SkipQueue(webapp2.RequestHandler):
 
 
 class StaticFileHandler(webapp2.RequestHandler):
+    """Serve static files out of / and /templates."""
     def get(self):
         if '.svg' in self.request.path:
             self.response.content_type = 'application/svg+xml'
@@ -139,97 +127,93 @@ class StaticFileHandler(webapp2.RequestHandler):
             self.response.content_type = 'image/png'
         elif '.jpg' in self.request.path:
             self.response.content_type = 'image/jpg'
-        self.response.write(open(self.ToRelativePath(self.request.path)).read())
-    def ToRelativePath(self, path):
-        if (len(path) > 0 and path[0] == "/"):
+        elif '.js' in self.request.path:
+            self.response.content_type = 'application/javascript'
+        relative_path = self.to_relative_path(self.request.path)
+        try:
+            self.response.write(open(relative_path).read())
+        except IOError:
+            self.response.status = 404
+
+    def to_relative_path(self, path):
+        if len(path) > 0 and path[0] == "/":
             return path[1:]
 
 
-class RobotControlHandler(webapp2.RequestHandler):
-    def post(self):
-        command = self.request.get("command")
-        details = self.request.get("text")
-        print command
-        print details
-        if "calibrate" in command:
-          controller.EnqueueGroup([
-              Home(),
-          ])
-        elif "drink" in command or ingredients.CreateNamedDrink(command):
-          ingredient_to_wt_loc = ingredients.CreateNamedDrink(command)
-          bulk_drinks = []
-          meter_by_time = False
-          if not ingredient_to_wt_loc:
-            target_composition = None
-            print "DRINK COMMAND: %s" % command
-            if "test1" in command:
-              print "DRINK COMMAND: %s" % command
-              ingredient_to_wt_loc = ingredients.CreateTestDrink(1)
-            elif "test" in command:
-              print "DRINK COMMAND: %s" % command
-              ingredient_to_wt_loc = ingredients.CreateTestDrink()
-            elif "sour drink" in command:
-              target_composition = [2, 1, 1, 0]
-              ingredient_to_wt_loc = ingredients.CreateRandomDrink(target_composition)
-            elif "!!prime" in command:
-              ingredient_to_wt_loc = ingredients.PrimeRun()
-            elif "40 random drinks" in command:
-              target_composition = [2, 1, 1, 0]
-              for unused_i in range(40):
-                drink = ingredients.CreateRandomDrink(target_composition)
-                bulk_drinks.append(drink)
-              meter_by_time = True
-            else:
-              target_composition = [3, 0.7, 0, 1]
-              ingredient_to_wt_loc = ingredients.CreateRandomDrink(target_composition)
-          if not bulk_drinks:
-            bulk_drinks = [ingredient_to_wt_loc]
-          for drink in bulk_drinks:
-            print drink
-            actions = []
-            ingredient_tuples = [(x, y, z) for x, (y, z) in drink.iteritems()]
-            ingredient_tuples = sorted(ingredient_tuples, key=lambda x: -x[2])
-            for ingredient, wt, loc in ingredient_tuples:
-              print "%s oz of %s at %f on valve %s" % (wt, ingredient, loc, loc)
-              actions.append(Move(-10.75 - 4.0 * (14 - loc)))
-              if 'bitter' in ingredient or meter_by_time:
-                actions.append(MeterBitters(valve_to_actuate=loc, drops_to_meter=6))
-              else:
-                actions.append(Meter(valve_to_actuate=loc, oz_to_meter=(wt * WT_TO_OZ)))
-            actions.append(Move(0.0))
-            actions.append(Home(carefully=False))
-            #actions.append(WaitForGlassRemoval())
-            controller.EnqueueGroup(actions)
-            self.response.write("Randomized ingredients: %s" %
-                ", ".join([x[0] for x in ingredient_tuples]))
-          return
-        elif "fill" in command:
-          oz, valve = details.split(",")
-          oz = float(oz)
-          valve = int(valve)
-          controller.EnqueueGroup([
-              Meter(valve_to_actuate = valve, oz_to_meter = oz),
-          ])
-        elif "move" in command:
-          controller.EnqueueGroup([
-              Move(float(details)),
-          ])
-        elif "vent" in command:
-          controller.EnqueueGroup([
-              Vent(),
-          ])
-        elif "compressor on" in command:
-          controller.EnqueueGroup([
-              CompressorToggle(State.ON)
-          ])
-        elif "compressor off" in command:
-          controller.EnqueueGroup([
-              CompressorToggle(State.OFF)
-          ])
+def SingleActionHandler(action):
+    """Create a handler for queueing the given action class"""
+    class Handler(webapp2.RequestHandler):
+        def post(self):
+            controller.EnqueueGroup([action(),])
+            self.response.write("%s action queued." % action.__name__)
+    return Handler
 
-        self.response.write("ok")
-    def get(self):
-        print "Shouldn't call get!"
+
+def valve_position(valve_no):
+    return -10.75 - 4.0 * (14 - valve_no)
+
+def actions_for_recipe(recipe):
+    """Returns the actions necessary to make the given recipe.
+
+    recipe: manual_db.Recipe
+    """
+    logging.info("Enqueuing actions for recipe %s", recipe)
+    actions = []
+    for ingredient in recipe.ingredients:
+        valve = ingredients.INGREDIENTS_ORDERED.index(ingredient.name.lower())
+        actions.append(Move(valve_position(valve)))
+        if hasattr(ingredient.qty, 'drops'):
+            actions.append(MeterBitters(
+                valve_to_actuate=valve, drops_to_meter=ingredient.qty.drops))
+        elif hasattr(ingredient.qty, 'oz'):
+            actions.append(Meter(
+                valve_to_actuate=valve, oz_to_meter=ingredient.qty.oz))
+        else:
+            raise Exception("Ingredient %s has no quantity for recipe %s:\n%s",
+                    ingredient.name, recipe.name, recipe)
+    actions.append(Move(0.0))
+    actions.append(Home(carefully=False))
+    return actions
+
+
+class DrinkHandler(webapp2.RequestHandler):
+    def post(self):
+        name = self.request.get('name')
+        if name:
+            for drink in manual_db.db:
+                if drink.name.lower() == name.lower():
+                    self.response.write("Making drink %s" % drink)
+                    controller.EnqueueGroup(actions_for_recipe(drink))
+                    return
+        elif self.request.get('random') == 'sour':
+            controller.EnqueueGroup(actions_for_recipe(RandomSourDrink()))
+        elif self.request.get('random') == 'spirituous':
+            controller.EnqueueGroup(actions_for_recipe(RandomSpirituousDrink()))
+        self.response.status = 400
+
+
+class PrimeHandler(webapp2.RequestHandler):
+    def post(self):
+        controller.EnqueueGroup(actions_for_recipe(
+            manual_db.Recipe(name='Prime', ingredients=[
+                manual_db.Ingredient(manual_db.Oz(.25), ingredient)
+                for ingredient in ingredients.INGREDIENTS_ORDERED])))
+
+
+class FillHandler(webapp2.RequestHandler):
+    def post(self):
+        try:
+            valve = int(self.request.get('valve'))
+            oz = float(self.request.get('oz'))
+            controller.EnqueueGroup([Meter(valve_to_actuate=valve, oz_to_meter=oz)])
+        except ValueError:
+            self.response.status = 400
+            self.response.write("valve and oz arguments are required.")
+
+
+class MoveHandler(webapp2.RequestHandler):
+    def post(self):
+        controller.EnqueueGroup([Move(float(self.request.get('to')))])
 
 
 class PausableWSGIApplication(webapp2.WSGIApplication):
@@ -252,28 +236,36 @@ def StartServer(port):
         level=logging.INFO)
     #app = webapp2.WSGIApplication([
     app = PausableWSGIApplication([
+        # User UI
         ('/', ServeFile('index-iframe.html')),
-        ('/test_drink', MakeTestDrink),
+        ('/templates/.*', StaticFileHandler),
+        ('/bower_components/.*', StaticFileHandler),
+        ('/drinks.js', DrinkDbHandler),
+        # User API
+        ('/api/drink', DrinkHandler),
+        # Debug UI
         ('/load_cell', ServeFile('load_cell.html')),
         ('/load_cell.json', LoadCellJson),
         ('/queue', InspectQueue),
         ('/queue.json', InspectQueueJson),
-        ('/drinks.js', DrinkDb),
+        # Control API
         ('/queue-retry', RetryQueue),
         ('/queue-clear', ClearQueue),
         ('/queue-skip', SkipQueue),
-        ('/robot-control', RobotControlHandler),
-        ('/templates/.*', StaticFileHandler),
-        ('/bower_components/.*', StaticFileHandler)
+        # Debug API
+        ('/api/calibrate', SingleActionHandler(Home)),
+        ('/api/vent', SingleActionHandler(Vent)),
+        ('/api/compressor-on',
+         SingleActionHandler(lambda: CompressorToggle(State.ON))),
+        ('/api/compressor-off',
+         SingleActionHandler(lambda: CompressorToggle(State.OFF))),
+        ('/api/prime', PrimeHandler),
+        ('/api/move', MoveHandler),
+        ('/api/fill', FillHandler),
     ])
     controller.app = app
     print "serving at http://%s:%i" % (socket.gethostname(), port)
-    # from multiprocessing import Pool
-    # pool = Pool(5)
-    # while True:
-    #   while app.drop_all:
-    #     time.sleep(1.0)
-    httpserver.serve(app, host="0.0.0.0", port=port, start_loop=True)  #, use_threadpool=pool)
+    httpserver.serve(app, host="0.0.0.0", port=port, start_loop=True)
 
 def main():
     import argparse

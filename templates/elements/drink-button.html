@@ -1,0 +1,20 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="command-image-button.html">
+
+<polymer-element name="drink-button" attributes="drink src">
+  <template>
+    <command-image-button url="/api/drink?name={{drink}}" text="{{drink}}"
+      src="{{image_url()}}" ></command-image-button>
+  </template>
+  <script>
+    Polymer({
+      image_url: function() {
+        if (this.src) {
+          if (this.src.indexOf("http://") == 0) return this.src
+          return "/templates/images/" + this.src;
+        }
+        return "/templates/images/" + this.drink.toLowerCase().replace(" ", "_");
+      },
+    });
+  </script>
+</polymer-element>
