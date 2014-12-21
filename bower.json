@@ -1,7 +1,7 @@
 {
   "name": "nebree8",
   "version": "0.0.0",
-  "homepage": "https://github.com/markstev/nebree8",
+  "homepage": "https://github.com/nebree8/nebree8",
   "description": "Robot bartender for fun",
   "main": "server.py",
   "license": "MIT",
@@ -14,9 +14,9 @@
     "tests"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#~0.4.0",
-    "paper-elements": "Polymer/paper-elements#~0.4.0",
-    "core-ajax": "Polymer/core-ajax#~0.4.0",
-    "font-roboto": "Polymer/font-roboto#~0.4.0"
+    "polymer": "Polymer/polymer#~0.5.2",
+    "paper-elements": "Polymer/paper-elements#~0.5.2",
+    "core-ajax": "Polymer/core-ajax#~0.5.2",
+    "font-roboto": "Polymer/font-roboto#~0.5.2"
   }
 }
