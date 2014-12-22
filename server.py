@@ -23,6 +23,8 @@ from config import ingredients
 from drinks import manual_db
 from drinks.random_drinks import RandomSourDrink, RandomSpirituousDrink
 
+TEMPLATE_DIR="templates/"
+STATIC_FILE_DIR="static/"
 robot = None
 controller = None
 
@@ -36,13 +38,13 @@ class CustomJsonEncoder(json.JSONEncoder):
     return json.JSONEncoder.default(self, obj)
 
 def GetTemplate(filename):
-    return open('templates/' + filename).read()
+    return open(TEMPLATE_DIR + filename).read()
 
 
 def ServeFile(filename):
     class ServeFileImpl(webapp2.RequestHandler):
         def get(self):
-            self.response.write(GetTemplate(filename))
+            self.response.write(open(filename).read())
     return ServeFileImpl
 
 
@@ -119,7 +121,7 @@ class SkipQueue(webapp2.RequestHandler):
 
 
 class StaticFileHandler(webapp2.RequestHandler):
-    """Serve static files out of / and /templates."""
+    """Serve static files out of STATIC_FILE_DIR."""
     def get(self):
         if '.svg' in self.request.path:
             self.response.content_type = 'application/svg+xml'
@@ -131,7 +133,7 @@ class StaticFileHandler(webapp2.RequestHandler):
             self.response.content_type = 'application/javascript'
         relative_path = self.to_relative_path(self.request.path)
         try:
-            self.response.write(open(relative_path).read())
+            self.response.write(open(STATIC_FILE_DIR + relative_path).read())
         except IOError:
             self.response.status = 404
 
@@ -237,14 +239,11 @@ def StartServer(port):
     #app = webapp2.WSGIApplication([
     app = PausableWSGIApplication([
         # User UI
-        ('/', ServeFile('index-iframe.html')),
-        ('/templates/.*', StaticFileHandler),
-        ('/bower_components/.*', StaticFileHandler),
         ('/drinks.js', DrinkDbHandler),
         # User API
         ('/api/drink', DrinkHandler),
         # Debug UI
-        ('/load_cell', ServeFile('load_cell.html')),
+        ('/load_cell', ServeFile(STATIC_FILE_DIR + 'load_cell.html')),
         ('/load_cell.json', LoadCellJson),
         ('/queue', InspectQueue),
         ('/queue.json', InspectQueueJson),
@@ -262,6 +261,9 @@ def StartServer(port):
         ('/api/prime', PrimeHandler),
         ('/api/move', MoveHandler),
         ('/api/fill', FillHandler),
+        # Default to serving static files.
+        ('/', ServeFile(STATIC_FILE_DIR + 'index.html')),
+        ('/.*', StaticFileHandler),
     ])
     controller.app = app
     print "serving at http://%s:%i" % (socket.gethostname(), port)
