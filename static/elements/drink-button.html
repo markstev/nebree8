@@ -11,9 +11,9 @@
       image_url: function() {
         if (this.src) {
           if (this.src.indexOf("http://") == 0) return this.src
-          return "/images/" + this.src;
+          return "/thumbs/" + this.src;
         }
-        return "/images/" + this.drink.toLowerCase().replace(" ", "_");
+        return "/thumbs/" + this.drink.toLowerCase().replace(" ", "_");
       },
     });
   </script>

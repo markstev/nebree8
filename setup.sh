@@ -11,7 +11,8 @@ function install_once {
   run git submodule update --init
   run sudo apt-get install \
     python-smbus python-pip i2c-tools \
-    libxml2 python-dev python-pycurl python-pyquery
+    libxml2 python-dev python-pycurl python-pyquery \
+    imagemagick
   run sudo pip install --upgrade pip
   run sudo pip install --upgrade \
     RPi.GPIO \
@@ -46,6 +47,7 @@ function install_polymer {
   # Warning: the node package is an amateur radio program!
   run sudo apt-get install nodejs nodejs-legacy npm
   run sudo npm install -g bower
+  run sudo npm install -g vulcanize # Used to minify app
   run bower update
 }
 
