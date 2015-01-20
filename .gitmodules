@@ -1,3 +1,6 @@
 [submodule "adafruit"]
 	path = adafruit
 	url = https://github.com/adafruit/Adafruit-Raspberry-Pi-Python-Code.git
+[submodule "arduinoio"]
+	path = arduinoio
+	url = https://github.com/markstev/arduinoio
