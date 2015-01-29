@@ -9,6 +9,7 @@ import threading
 import time
 import Queue
 import RPi.GPIO as gpio
+import arduino
 
 DEBUG = True
 def DebugPrint(*args):
@@ -88,6 +89,7 @@ class Inputs(enum.Enum):
 _SHIFT_REG_REFRESH_RATE = 10000.
 _SHIFT_REG_SLEEP_TIME = 0.0002 # 1 ms -> 1khz
 _SHIFT_REG_ADDRESS_OFFSET = 1000
+_ARDUINO_ADDRESS_OFFSET = 2000
 
 class IOBank(object):
   def __init__(self, update_shift_reg=True):
@@ -101,12 +103,13 @@ class IOBank(object):
       gpio.setup(pin.value, gpio.IN, pull_up_down=gpio.PUD_UP)
     if update_shift_reg:
       self.current_shifted_byte = [0] * 24
-      self.current_shifted_byte[Outputs.COMPRESSOR.value - 1000] = 1
+      self.current_shifted_byte[Outputs.COMPRESSOR.value - _SHIFT_REG_ADDRESS_OFFSET] = 1
       self.signal_refresh = Queue.Queue(1)
       self.thread = threading.Thread(target=self.__RefreshShiftOutputs)
       self.thread.daemon = True
       self.thread.start()
     #self.WriteOutput(Outputs.COMPRESSOR, 0)
+    self.arduino = arduino.Arduino()
 
   def ReadInput(self, input_enum):
     return gpio.input(input_enum.value)
@@ -118,7 +121,7 @@ class IOBank(object):
   def WriteOutput(self, output_enum, value):
     if output_enum.value < _SHIFT_REG_ADDRESS_OFFSET:
       gpio.output(output_enum.value, value)
-    else:
+    elif output_enum.value < _ARDUINO_ADDRESS_OFFSET:
       # Shift register output.
       # Steps to write:
       # 1: update current shift reg bytes overall
@@ -130,6 +133,8 @@ class IOBank(object):
       time.sleep(0.1)
       if output_enum == Outputs.COMPRESSOR:
         time.sleep(0.5)
+    else:
+      self.arduino.WriteOutput(output_enum.value - _ARDUINO_ADDRESS_OFFSET, value)
 
 
   def __Shift(self, byte):
