@@ -37,9 +37,12 @@ class Arduino:
 def main():
   arduino = Arduino()
   while True:
-    for setting in [1, 0]:
-      arduino.WriteOutput(8, setting)
-      time.sleep(1.0)
+    arduino.WriteOutput(2, 1)
+    time.sleep(1.0)
+    # for pin in [13, 12, 11, 10, 9, 2]:
+    #   for setting in [1, 0]:
+    #     arduino.WriteOutput(pin, setting)
+    #     time.sleep(1.0)
 
 
 if __name__ == "__main__":

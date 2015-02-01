@@ -17,6 +17,7 @@ class UCIOModule : public arduinoio::UCModule {
     for (int i = 0; i < 256; ++i) {
       pins_ready_[i] = false;
     }
+    status_on_ = false;
   }
 
   virtual const arduinoio::Message* Tick() {
@@ -27,6 +28,7 @@ class UCIOModule : public arduinoio::UCModule {
     int length;
     const char* command = (const char*) message.command(&length);
     if (strncmp(command, SET_IO, SET_IO_LENGTH) == 0) {
+      status_on_ = !status_on_;
       for (int i = SET_IO_LENGTH; i < length - 1; i += 2) {
         char pin = command[i];
         bool on = command[i + 1] == 0x0 ? LOW : HIGH;
@@ -41,6 +43,7 @@ class UCIOModule : public arduinoio::UCModule {
 
  private:
   bool pins_ready_[256];
+  bool status_on_;
 };
 
 }  // namespace nebree8
