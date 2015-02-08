@@ -1,0 +1,47 @@
+<link rel="import" href="/bower_components/paper-item/paper-item.html">
+<link rel="import" href="/bower_components/paper-button/paper-button.html">
+<link rel="import" href="/bower_components/core-image/core-image.html">
+<link rel="import" href="/bower_components/core-ajax/core-ajax.html">
+
+<polymer-element name="drink-selector" image="{{image}}" drink="{{drink}}">
+  <template>
+    <style>
+      .response {
+        color: "0099FF"
+      }
+      .drink-row {
+        margin: 10px
+      }
+      .collapsed {
+        visibility: collapse
+      }
+    </style>
+    <div layout horizontal class="drink-row">
+      <img src="images/{{image}}" style="width:100px; height:100px; background-color: lightgray;"></img>
+      <core-image src="images/{{image}}" sizing="contain"
+        style="width:100px; height:100px; background-color: lightgray;">
+      </core-image>
+      <paper-item label="{{drink}}" on-tap="{{itemClick}}"></paper-item>
+      <div id="drink-details" class="details collapsed">
+        Drink details!!
+      </div>
+    </div>
+  </template>
+  <script>
+  Polymer({
+    publish: {
+      image: {
+        value: "default",
+        reflect: true
+      },
+      drink: {
+        value: "default",
+        reflect: true
+      }
+    },
+    itemClick: function(event, detail, sender) {
+      document.querySelector("drink-details").className = "details";
+    }
+  });
+  </script>
+</polymer-element>

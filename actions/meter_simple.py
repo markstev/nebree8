@@ -12,11 +12,17 @@ class MeterSimple(Action):
   def __call__(self, robot):
     if self.oz_to_meter == 0:
       logging.warning("oz_to_meter was zero, returning early.")
+    self.initial_reading = robot.load_cell.recent_summary(secs=.2).mean
     tare = _tare(robot)
+    self.tare_reading = tare.mean
     self.target_reading = (tare.mean + OZ_TO_ADC_VALUES * self.oz_to_meter)
+    last_summary = tare
     with robot.OpenValve(self.valve_to_actuate):
-      while robot.load_cell.recent_summary(secs=.2).mean < self.target_reading:
+      while last_summary.mean < self.target_reading:
         time.sleep(.05)
+        last_summary = robot.load_cell.recent_summary(secs=.2)
+        self.current_reading = last_summary.mean
+      self.final_reading = self.current_reading
     time.sleep(1)
     r = robot.load_cell.recent(secs = time.time() - tare.timestamp + 5)
     f = open('readings_%s_%foz.csv' % (

@@ -1,7 +1,7 @@
 <link rel="import" href="/bower_components/paper-button/paper-button.html">
 <link rel="import" href="/bower_components/core-ajax/core-ajax.html">
 
-<polymer-element name="command-button" comm="{{comm}}" textValue="{{textValue}}">
+<polymer-element name="large-button" urlLink="{{urlLink}}" textValue="{{textValue}}">
   <template>
     <style>
       .response {
@@ -10,35 +10,27 @@
     </style>
     <div layout horizontal>
       <paper-button
-        label="{{comm}}"
+        label="{{textValue}}"
         on-tap="{{buttonClick}}"
+        urlLink="{{urlLink}}"
         raisedButton>
       </paper-button>
-      <span id="reply" class="response"></span>
-
-      <core-ajax id="command"
-        auto=false
-        url="../api/{{comm}}"
-        params='{"command":"{{comm}}", "text":"{{textValue}}"}'
-        handleAs="json"
-        method="POST"
-        on-core-response="{{handleResponse}}">
-      </core-ajax>
     </div>
   </template>
   <script>
   Polymer({
     publish: {
-      comm: {
+      textValue: {
+        value: "default",
+        reflect: true
+      },
+      urlLink: {
         value: "default",
         reflect: true
       }
     },
     buttonClick: function(event, detail, sender) {
-      this.$.command.go();
-    },
-    handleResponse: function(event, response) {
-      this.$.reply.innerHTML = response.response;
+      window.location.href = event.target.getAttribute("urlLink");
     }
   });
   </script>

@@ -135,6 +135,7 @@ class StaticFileHandler(webapp2.RequestHandler):
         try:
             self.response.write(open(STATIC_FILE_DIR + relative_path).read())
         except IOError:
+            print "404 could not load: %s" % (STATIC_FILE_DIR + relative_path)
             self.response.status = 404
 
     def to_relative_path(self, path):

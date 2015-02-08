@@ -32,31 +32,57 @@ class Outputs(enum.Enum):
   MOTOR_UP_A = 27
   MOTOR_UP_B = 22
 
-  VALVE_0 = 1019
-  VALVE_1 = 1001
-  VALVE_2 = 1002
-  VALVE_3 = 1003
-  VALVE_4 = 1004
-  VALVE_6 = 1005
-  VALVE_5 = 1006
-  VALVE_7 = 1007
+  # VALVE_0 = 1019
+  # VALVE_1 = 1001
+  # VALVE_2 = 1002
+  # VALVE_3 = 1003
+  # VALVE_4 = 1004
+  # VALVE_6 = 1005
+  # VALVE_5 = 1006
+  # VALVE_7 = 1007
 
-  VALVE_8 = 1014  # TO VERIFY
-  VALVE_9 = 1015  # TO VERIFY
-  VALVE_10 = 1011
-  VALVE_11 = 1010
-  VALVE_12 = 1009
-  VALVE_13 = 1008
-  VALVE_14 = 1012
-  VALVE_15 = 1013 # NOT CONNECTED
+  # VALVE_8 = 1014  # TO VERIFY
+  # VALVE_9 = 1015  # TO VERIFY
+  # VALVE_10 = 1011
+  # VALVE_11 = 1010
+  # VALVE_12 = 1009
+  # VALVE_13 = 1008
+  # VALVE_14 = 1012
+  # VALVE_15 = 1013 # NOT CONNECTED
 
-  CHUCK = 1022
-  COMPRESSOR_HEAD = 1020
-  COMPRESSOR_VENT = 1021
+  # CHUCK = 1022
+  # COMPRESSOR_HEAD = 1020
+  # COMPRESSOR_VENT = 1021
+  # # To pressurize, open head, close vent
+  # # For chuck, close head, open vent
+  # # For cleanup, open both
+  # COMPRESSOR = 1023
+
+  #VALVE_0 = 2013 # NOT CONNECTED
+  VALVE_0 = 2003
+  VALVE_1 = 2002
+  VALVE_2 = 2014  # orange
+  VALVE_3 = 2015
+  VALVE_4 = 2018
+  VALVE_5 = 2020
+  VALVE_6 = 2019
+  VALVE_7 = 2021
+  VALVE_8 = 2016
+  VALVE_9 = 2017
+  VALVE_10 = 2013
+  VALVE_11 = 2012
+  VALVE_12 = 2011
+  VALVE_13 = 2010
+  VALVE_14 = 2009
+  VALVE_15 = 2013  # NOT CONNECTED
+
+  CHUCK = 2007
+  COMPRESSOR_HEAD = 2004
+  COMPRESSOR_VENT = 2005
   # To pressurize, open head, close vent
   # For chuck, close head, open vent
   # For cleanup, open both
-  COMPRESSOR = 1023
+  COMPRESSOR = 2006
 
 VALVES = (
     Outputs.VALVE_0,
@@ -92,13 +118,18 @@ _SHIFT_REG_ADDRESS_OFFSET = 1000
 _ARDUINO_ADDRESS_OFFSET = 2000
 
 class IOBank(object):
-  def __init__(self, update_shift_reg=True):
+  def __init__(self, update_shift_reg=False, update_arduino=True):
     self.last_time = time.time()
     gpio.setmode(gpio.BCM)
     gpio.setwarnings(False)
+    if update_arduino:
+      self.arduino = arduino.Arduino()
+    else:
+      self.arduino = None
     for output in Outputs:
       if output.value < _SHIFT_REG_ADDRESS_OFFSET:
         gpio.setup(output.value, gpio.OUT)
+      self.WriteOutput(output, 0)
     for pin in Inputs:
       gpio.setup(pin.value, gpio.IN, pull_up_down=gpio.PUD_UP)
     if update_shift_reg:
@@ -108,8 +139,7 @@ class IOBank(object):
       self.thread = threading.Thread(target=self.__RefreshShiftOutputs)
       self.thread.daemon = True
       self.thread.start()
-    #self.WriteOutput(Outputs.COMPRESSOR, 0)
-    self.arduino = arduino.Arduino()
+    self.WriteOutput(Outputs.COMPRESSOR, 1)
 
   def ReadInput(self, input_enum):
     return gpio.input(input_enum.value)
@@ -134,7 +164,8 @@ class IOBank(object):
       if output_enum == Outputs.COMPRESSOR:
         time.sleep(0.5)
     else:
-      self.arduino.WriteOutput(output_enum.value - _ARDUINO_ADDRESS_OFFSET, value)
+      if self.arduino:
+        self.arduino.WriteOutput(output_enum.value - _ARDUINO_ADDRESS_OFFSET, value)
 
 
   def __Shift(self, byte):
