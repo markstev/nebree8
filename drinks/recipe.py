@@ -52,4 +52,7 @@ class Drops(Unit):
         return 0
     def __str__(self):
         return "%i drops" % self.drops
+    @property
+    def parts(self):
+        return 1
 

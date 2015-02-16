@@ -179,6 +179,24 @@ def actions_for_recipe(recipe):
     return actions
 
 
+class AllRecpipesLookupHandler(webapp2.RequestHandler):
+  def get(self):
+    drinks = []
+    for drink in manual_db.db:
+      ingredients = []
+      for ingredient in drink.ingredients:
+        ingredients.append({'name': ingredient.name,
+            'parts': ingredient.qty.parts,
+            'total_parts': ingredient.qty.total_parts})
+      image_url = drink.name.replace(' ', '_').lower() + '.jpg'
+      drinks.append({'name': drink.name,
+                     'ingredients': ingredients,
+                     'image': image_url})
+
+    self.response.write(json.dumps(drinks))
+    print "responding to drinks request"
+
+
 class DrinkHandler(webapp2.RequestHandler):
     def post(self):
         name = self.request.get('name')
@@ -240,6 +258,7 @@ def StartServer(port):
     #app = webapp2.WSGIApplication([
     app = PausableWSGIApplication([
         # User UI
+        ('/all_drinks', AllRecpipesLookupHandler),
         ('/drinks.js', DrinkDbHandler),
         # User API
         ('/api/drink', DrinkHandler),

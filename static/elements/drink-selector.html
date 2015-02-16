@@ -2,8 +2,11 @@
 <link rel="import" href="/bower_components/paper-button/paper-button.html">
 <link rel="import" href="/bower_components/core-image/core-image.html">
 <link rel="import" href="/bower_components/core-ajax/core-ajax.html">
+<link rel="import" href="/bower_components/core-collapse/core-collapse.html">
+<link rel="import" href="/bower_components/paper-slider/paper-slider.html">
+<!--<script src="../../jquery.js">-->
 
-<polymer-element name="drink-selector" image="{{image}}" drink="{{drink}}">
+<polymer-element name="drink-selector" image="{{image}}" drink="{{drink}}" details="{{details}}" show_details="{{show_details}}">
   <template>
     <style>
       .response {
@@ -12,19 +15,25 @@
       .drink-row {
         margin: 10px
       }
-      .collapsed {
-        visibility: collapse
-      }
     </style>
-    <div layout horizontal class="drink-row">
-      <img src="images/{{image}}" style="width:100px; height:100px; background-color: lightgray;"></img>
-      <core-image src="images/{{image}}" sizing="contain"
-        style="width:100px; height:100px; background-color: lightgray;">
-      </core-image>
-      <paper-item label="{{drink}}" on-tap="{{itemClick}}"></paper-item>
-      <div id="drink-details" class="details collapsed">
-        Drink details!!
+    <div layout vertical class="drink-row">
+      <div layout horizontal class="drink-row">
+        <core-image
+          src="images/{{image}}"
+          sizing="contain"
+          style="width:100px; height:100px; background-color: lightgray;"
+          on-tap="{{drinkTapped}}">
+        </core-image>
+        <paper-item label="{{drink}}" on-tap="{{drinkTapped}}"></paper-item>
       </div>
+      <core-collapse id="drink_details" opened="{{show_details}}">
+        <template repeat="{{ingredient in details}}">
+          <div layout horizontal>
+            <paper-slider value="{{ingredient.parts}}" min="0" max="{{ingredient.total_parts}}" snaps=true></paper-slider>
+            <paper-item label="{{ingredient.name}}"></paper-item>
+          </div>
+        </template>
+      </core-collapse>
     </div>
   </template>
   <script>
@@ -37,10 +46,28 @@
       drink: {
         value: "default",
         reflect: true
+      },
+      details: {
+        value: "",
+        reflect: true
+      },
+      show_detals: {
+        value: false,
+        reflect: true
       }
     },
-    itemClick: function(event, detail, sender) {
-      document.querySelector("drink-details").className = "details";
+    drinkTapped: function(event, detail, sender) {
+      this.show_details = !this.show_details;
+      //this.$.drink_details.toggle();
+    },
+    domReady: function() {
+      this.$.drink_details.opened = false
+      this.show_details = false;
+      this.show_details = true;
+      this.show_details = false;
+      //this.$.drink_details.toggle();
+      //this.$.drink_details.opened = "false";
+      //alert(this.$.drink_details.opened);
     }
   });
   </script>

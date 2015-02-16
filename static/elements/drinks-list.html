@@ -1,0 +1,15 @@
+<link rel="import" href="drink-selector.html">
+<link rel="import" href="recipes-service.html">
+
+<polymer-element name="drinks-list">
+  <template>
+    <recipes-service recipes="{{recipes}}"></recipes-service>
+    <template repeat="{{recipe in recipes}}">
+      <drink-selector drink="{{recipe.name}}" image="{{recipe.image}}" details="{{recipe.ingredients}}">
+      </drink-selector>
+    </template>
+  </template>
+  <script>
+    Polymer({});
+  </script>
+</polymer-element>

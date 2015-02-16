@@ -1,0 +1,25 @@
+<link rel="import" href="/bower_components/core-ajax/core-ajax.html">
+
+<polymer-element name="recipes-service" recipes="{{recipes}}">
+  <template>
+    <core-ajax id="ajax"
+      auto
+      url="../all_drinks"
+      handleAs="json"
+      on-core-response="{{lookupResponse}}">
+    </core-ajax>
+  </template>
+  <script>
+  Polymer({
+    publish: {
+      recipes: {
+        value: "",
+        reflect: true
+      },
+    },
+    lookupResponse: function() {
+      this.recipes = this.$.ajax.response.slice(0);
+    }
+  });
+  </script>
+</polymer-element>
