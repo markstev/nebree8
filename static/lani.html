@@ -1,0 +1,37 @@
+<html>
+<head>
+  <title>N E BRE 8 - Homepage</title>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <link rel="import" href="../bower_components/polymer/polymer.html">
+  <link rel="import" href="../bower_components/font-roboto/roboto.html">
+  <link rel="import" href="elements/large-button.html">
+
+  <style>
+    html,body {
+      height: 100%;
+      margin: 0;
+      background-color: #E5E5E5;
+      font-family: 'RobotoDraft', sans-serif;
+    }
+
+    .container {
+      height: 600px;
+    }
+    .graph-container {
+      width: 1000px;
+      height: 500px;
+    }
+  </style>
+</head>
+<body fullbleed>
+  <h1>N.E.Bree-8</h1>
+  <div class="container" layout vertical center>
+    <div layout vertical justified>
+      <large-button urlLink="selector.html" textValue="Select a drink"></large-button>
+      <large-button urlLink="random.html" textValue="Random"></large-button>
+    </div>
+  </div>
+  <div layout vertical center class="graph-container">
+  </div>
+</body>
+</html>
