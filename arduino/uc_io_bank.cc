@@ -9,6 +9,7 @@
 #include "../arduinoio/lib/serial_module.h"
 #include "../arduinoio/lib/arduinoio.h"
 #include "uc_io_module.h"
+#include "uc_servo_module.h"
 
 const int SERIAL_RX_PIN = 0;
 const int SERIAL_TX_PIN = 1;
@@ -22,8 +23,9 @@ void setup() {
   Serial.begin(9600);
   arduino_io.Add(new arduinoio::SerialRXModule(NULL, 0));
   arduino_io.Add(new nebree8::UCIOModule());
-//pinMode(7, OUTPUT);
-//digitalWrite(7, HIGH);
+  arduino_io.Add(new nebree8::UCServoModule());
+  pinMode(13, OUTPUT);
+  digitalWrite(13, LOW);
 //pinMode(6, OUTPUT);
 //digitalWrite(6, LOW);
 }

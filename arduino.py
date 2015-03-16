@@ -18,6 +18,12 @@ class Arduino:
   def WriteOutput(self, pin, value):
     self.signal_refresh.put((pin, value), True, None)
 
+  def WriteServo(self, pin, start_degrees, end_degrees, seconds):
+    raw_message = [chr(pin), chr(start_degrees), chr(end_degrees), chr(seconds)]
+    command = "SERVO" + "".join(raw_message)
+    self.interface.Write(0, command)
+    print "set servo"
+
   def __RefreshOutputs(self):
     while True:
       raw_message = []
@@ -36,13 +42,33 @@ class Arduino:
 
 def main():
   arduino = Arduino()
-  while True:
-    arduino.WriteOutput(2, 1)
-    time.sleep(1.0)
-    # for pin in [13, 12, 11, 10, 9, 2]:
-    #   for setting in [1, 0]:
-    #     arduino.WriteOutput(pin, setting)
-    #     time.sleep(1.0)
+  #hile True:
+  # #arduino.WriteOutput(2, 1)
+  # #time.sleep(1.0)
+  # # for pin in [13, 12, 11, 10, 9, 2]:
+  # #   for setting in [1, 0]:
+  # #     arduino.WriteOutput(pin, setting)
+  # #     time.sleep(1.0)
+  # arduino.WriteServo(21, 90, 180, 5)
+  # time.sleep(5)
+  # print "should be done"
+  # time.sleep(2)
+  # arduino.WriteServo(21, 180, 90, 5)
+  # time.sleep(5)
+  # print "should be done"
+
+  end = 160
+  middle = 100
+  ts = 3
+  arduino.WriteServo(22, end, middle, ts)
+  arduino.WriteServo(21, 180, 90, ts)
+  time.sleep(10)
+  print "should be done"
+  time.sleep(2)
+  arduino.WriteServo(22, 90, 180, ts)
+  arduino.WriteServo(21, 90, 180, ts)
+  time.sleep(10)
+  print "should be done"
 
 
 if __name__ == "__main__":
