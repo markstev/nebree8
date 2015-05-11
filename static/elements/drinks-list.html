@@ -4,12 +4,34 @@
 <polymer-element name="drinks-list">
   <template>
     <recipes-service recipes="{{recipes}}"></recipes-service>
-    <template repeat="{{recipe in recipes}}">
-      <drink-selector drink="{{recipe.name}}" image="{{recipe.image}}" details="{{recipe.ingredients}}">
-      </drink-selector>
-    </template>
+    <div id='drinks_container'>
+      <template repeat="{{recipe in recipes}}">
+        <drink-selector
+        id="drink"
+        drink="{{recipe.name}}"
+        image="{{recipe.image}}"
+        details="{{recipe.ingredients}}"
+        gray_out="{{grayOut}}"
+        hide_if_not_selected="{{drinkSelected}}"
+        show_details=false
+        on-tap="{{drinkTapped}}">
+        </drink-selector>
+      </template>
+    </div>
   </template>
   <script>
-    Polymer({});
+    Polymer({
+      publish: {
+        grayOut: {
+          value: "false",
+        },
+        drinkSelected: {
+          value: "false",
+        }
+      }
+    //drinkTapped: function() {
+    //  this.$.drinks_container.querySelector('#drink').setAttribute("gray_out", "true");
+    //},
+    });
   </script>
 </polymer-element>

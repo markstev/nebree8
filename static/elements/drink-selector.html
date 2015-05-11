@@ -4,9 +4,17 @@
 <link rel="import" href="/bower_components/core-ajax/core-ajax.html">
 <link rel="import" href="/bower_components/core-collapse/core-collapse.html">
 <link rel="import" href="/bower_components/paper-slider/paper-slider.html">
+<link rel="import" href="large-button.html">
 <!--<script src="../../jquery.js">-->
 
-<polymer-element name="drink-selector" image="{{image}}" drink="{{drink}}" details="{{details}}" show_details="{{show_details}}">
+<polymer-element
+name="drink-selector"
+image="{{image}}"
+drink="{{drink}}"
+details="{{details}}"
+show_details="{{show_details}}"
+gray_out="{{gray_out}}"
+hide_if_not_selected="{{hide_if_not_selected}}">
   <template>
     <style>
       .response {
@@ -15,20 +23,48 @@
       .drink-row {
         margin: 10px
       }
+      .next-button-hidden {
+        visibility: hidden;
+      }
+      .next-button-visible {
+        visibility: visible;
+      }
+      .drink-row-gray-true-false {
+        background-color: gray;
+      }
+      .drink-row-hide-true-false {
+        visibility: hidden;
+      }
+      .back-button {
+        width: 100px;
+      }
     </style>
-    <div layout vertical class="drink-row">
-      <div layout horizontal class="drink-row">
+    <div layout vertical
+      class="drink-row-gray-{{gray_out}}-{{show_details}} drink-row-hide-{{hide_if_not_selected}}-{{selected}}">
+      <div layout horizontal class="drink-row" on-tap="{{drinkTapped}}">
+        <core-collapse id="back" horizontal=true opened="{{selected}}">
+          <div class="back-button">
+            <paper-item label="BACK" on-tap="{{drinkDeSelected}}"></paper-item>
+          </div>
+        </core-collapse>
         <core-image
           src="images/{{image}}"
           sizing="contain"
-          style="width:100px; height:100px; background-color: lightgray;"
-          on-tap="{{drinkTapped}}">
+          style="width:100px; height:100px; background-color: lightgray;">
         </core-image>
-        <paper-item label="{{drink}}" on-tap="{{drinkTapped}}"></paper-item>
+        <div flex>
+          <paper-item label="{{drink}}"></paper-item>
+        </div>
+        <div hidden?="{{!show_details}}">
+          <!--<large-button urlLink="selector.html" textValue="Next">-->
+          <paper-item label="NEXT" on-tap="{{drinkSelected}}"></paper-item>
+         <!-- <large-button on-tap="{{drinkSelected}}" textValue="Next">
+         </large-button>-->
+        </div>
       </div>
       <core-collapse id="drink_details" opened="{{show_details}}">
         <template repeat="{{ingredient in details}}">
-          <div layout horizontal>
+          <div layout horizontal on-tap="{{drinkTapped}}">
             <paper-slider value="{{ingredient.parts}}" min="0" max="{{ingredient.total_parts}}" snaps=true></paper-slider>
             <paper-item label="{{ingredient.name}}"></paper-item>
           </div>
@@ -54,17 +90,47 @@
       show_detals: {
         value: false,
         reflect: true
+      },
+      gray_out: {
+        value: "false",
+        reflect: true
+      },
+      hide_if_not_selected: {
+        value: "false",
+        reflect: true
+      },
+      selected: {
+        value: false,
+        reflect: true
       }
     },
     drinkTapped: function(event, detail, sender) {
       this.show_details = !this.show_details;
-      //this.$.drink_details.toggle();
+      this.gray_out = this.show_details;
+    },
+    drinkSelected: function(event, detail, sender) {
+      //this.show_details = false;
+      this.hide_if_not_selected = true;
+      this.selected = true;
+    },
+    drinkDeSelected: function(event, detail, sender) {
+      this.show_details = false;
+      this.hide_if_not_selected = false;
+      this.selected = false;
     },
     domReady: function() {
-      this.$.drink_details.opened = false
-      this.show_details = false;
-      this.show_details = true;
-      this.show_details = false;
+      this.async(function() {
+        this.$.drink_details.toggle();
+        this.$.back.toggle();
+        this.async(function() {
+          this.$.drink_details.toggle();
+          this.$.back.toggle();
+        }, null, 1);
+      }, null, 1);
+    //this.$.drink_details.opened = false
+    //this.show_details = false;
+    //this.show_details = true;
+    //this.show_details = false;
       //this.$.drink_details.toggle();
       //this.$.drink_details.opened = "false";
       //alert(this.$.drink_details.opened);
