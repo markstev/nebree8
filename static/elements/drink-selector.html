@@ -7,14 +7,7 @@
 <link rel="import" href="large-button.html">
 <!--<script src="../../jquery.js">-->
 
-<polymer-element
-name="drink-selector"
-image="{{image}}"
-drink="{{drink}}"
-details="{{details}}"
-show_details="{{show_details}}"
-gray_out="{{gray_out}}"
-hide_if_not_selected="{{hide_if_not_selected}}">
+<polymer-element name="drink-selector">
   <template>
     <style>
       .response {
@@ -61,15 +54,34 @@ hide_if_not_selected="{{hide_if_not_selected}}">
          <!-- <large-button on-tap="{{drinkSelected}}" textValue="Next">
          </large-button>-->
         </div>
-      </div>
+        <core-collapse id="submit_area" horizontal=true opened="{{selected}}">
+          <paper-button on-tap="{{createDrink}}" label="Create my drink!">
+          </paper-button>
+        </core-collapse>
+      </div>  <!-- end horizontal -->
       <core-collapse id="drink_details" opened="{{show_details}}">
         <template repeat="{{ingredient in details}}">
-          <div layout horizontal on-tap="{{drinkTapped}}">
+          <div layout horizontal>
             <paper-slider value="{{ingredient.parts}}" min="0" max="{{ingredient.total_parts}}" snaps=true></paper-slider>
             <paper-item label="{{ingredient.name}}"></paper-item>
+            <div on-tap="{{drinkTapped}}" flex></div>
           </div>
         </template>
       </core-collapse>
+      <core-collapse id="name_entry" opened="{{selected}}">
+        <paper-input id="name_input" label="{{user_name}}">
+        </paper-input>
+      </core-collapse>
+      <core-collapse id="submitted_message" opened="{{submitted}}">
+        <paper-item label="Thanks, order submitted."></paper-item>
+      </core-collapse>
+      <core-ajax
+        id="ajax_submit"
+        auto=false
+        url="../create_drink"
+        handleAs="json"
+        method="post"
+        on-core-response="{{handleSubmitResponse}}"></core-ajax>
     </div>
   </template>
   <script>
@@ -92,7 +104,11 @@ hide_if_not_selected="{{hide_if_not_selected}}">
         reflect: true
       },
       gray_out: {
-        value: "false",
+        value: false,
+        reflect: true
+      },
+      user_name: {
+        value: "user_name",
         reflect: true
       },
       hide_if_not_selected: {
@@ -102,21 +118,47 @@ hide_if_not_selected="{{hide_if_not_selected}}">
       selected: {
         value: false,
         reflect: true
+      },
+      submitted: {
+        value: false,
+        reflect: true
       }
     },
     drinkTapped: function(event, detail, sender) {
-      this.show_details = !this.show_details;
-      this.gray_out = this.show_details;
+      if (!this.selected && (!this.gray_out || this.show_details)) {
+        this.show_details = !this.show_details;
+        this.gray_out = this.show_details;
+      }
     },
     drinkSelected: function(event, detail, sender) {
       //this.show_details = false;
       this.hide_if_not_selected = true;
       this.selected = true;
+      this.show_details = false;
+      this.gray_out = false;
     },
     drinkDeSelected: function(event, detail, sender) {
       this.show_details = false;
       this.hide_if_not_selected = false;
       this.selected = false;
+    },
+    createDrink: function(event, detail, sender) {
+      var params = {
+        "alt":"json",
+        "user_name":this.$.name_input.value,
+        "drink_name":this.drink
+      };
+    //var details_sliders = this.$.details_slider;
+    //var details_names = this.$.details_name;
+      for (var i = 0; i < this.details.length; i++) {
+        params["ingredient=" + this.details[i].name] = this.details[i].parts;
+      }
+      this.$.ajax_submit.params = params;
+      this.$.ajax_submit.go();
+      //alert("create drink with name: " + this.$.name_input.value);
+    },
+    handleSubmitResponse: function() {
+      this.submitted = true;
     },
     domReady: function() {
       this.async(function() {
@@ -125,6 +167,7 @@ hide_if_not_selected="{{hide_if_not_selected}}">
         this.async(function() {
           this.$.drink_details.toggle();
           this.$.back.toggle();
+          this.submitted = false;
         }, null, 1);
       }, null, 1);
     //this.$.drink_details.opened = false
