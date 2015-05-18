@@ -232,6 +232,18 @@ class FillHandler(webapp2.RequestHandler):
             self.response.write("valve and oz arguments are required.")
 
 
+class CreateDrinkHandler(webapp2.RequestHandler):
+  def post(self):
+    try:
+      for arg in self.request.arguments():
+        print "%s -> %s" % (arg, self.request.get(arg))
+        self.response.status = 200
+        self.response.write("ok")
+    except ValueError:
+      self.response.status = 400
+      self.response.write("valve and oz arguments are required.")
+
+
 class MoveHandler(webapp2.RequestHandler):
     def post(self):
         controller.EnqueueGroup([Move(float(self.request.get('to')))])
@@ -259,6 +271,7 @@ def StartServer(port):
     app = PausableWSGIApplication([
         # User UI
         ('/all_drinks', AllRecpipesLookupHandler),
+        ('/create_drink', CreateDrinkHandler),
         ('/drinks.js', DrinkDbHandler),
         # User API
         ('/api/drink', DrinkHandler),
