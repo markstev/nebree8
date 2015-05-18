@@ -14,6 +14,8 @@
         gray_out="{{grayOut}}"
         hide_if_not_selected="{{drinkSelected}}"
         show_details=false
+        user_name="{{userName}}"
+        submitted=true
         on-tap="{{drinkTapped}}">
         </drink-selector>
       </template>
@@ -23,10 +25,17 @@
     Polymer({
       publish: {
         grayOut: {
-          value: "false",
+          value: false,
+          reflect: true
         },
         drinkSelected: {
           value: "false",
+          reflect: true
+        },
+        userName: {
+          // Note, can't yet set globally. Not sure why; it should work. Maybe the input element isn't setting the internal value.
+          value: "Your Name",
+          reflect: true
         }
       }
     //drinkTapped: function() {
