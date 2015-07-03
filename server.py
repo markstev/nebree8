@@ -223,10 +223,22 @@ class PrimeHandler(webapp2.RequestHandler):
 
 class FillHandler(webapp2.RequestHandler):
     def post(self):
+        print "FILL HANDLER"
         try:
             valve = int(self.request.get('valve'))
             oz = float(self.request.get('oz'))
             controller.EnqueueGroup([Meter(valve_to_actuate=valve, oz_to_meter=oz)])
+        except ValueError:
+            self.response.status = 400
+            self.response.write("valve and oz arguments are required.")
+
+
+class Test1Handler(webapp2.RequestHandler):
+    def post(self):
+        print "TEST1 HANDLER"
+        try:
+            test_drink = manual_db.TEST_DRINK
+            controller.EnqueueGroup(actions_for_recipe(test_drink))
         except ValueError:
             self.response.status = 400
             self.response.write("valve and oz arguments are required.")
@@ -246,7 +258,8 @@ class CreateDrinkHandler(webapp2.RequestHandler):
 
 class MoveHandler(webapp2.RequestHandler):
     def post(self):
-        controller.EnqueueGroup([Move(float(self.request.get('to')))])
+      print self.request
+      controller.EnqueueGroup([Move(float(self.request.get('text')))])
 
 
 class PausableWSGIApplication(webapp2.WSGIApplication):
@@ -292,8 +305,9 @@ def StartServer(port):
         ('/api/compressor-off',
          SingleActionHandler(lambda: CompressorToggle(State.OFF))),
         ('/api/prime', PrimeHandler),
-        ('/api/move', MoveHandler),
-        ('/api/fill', FillHandler),
+        ('/api/move.*', MoveHandler),
+        ('/api/fill.*', FillHandler),
+        ('/api/test1.*', Test1Handler),
         # Default to serving static files.
         ('/', ServeFile(STATIC_FILE_DIR + 'index.html')),
         ('/.*', StaticFileHandler),

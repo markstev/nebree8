@@ -16,7 +16,8 @@ class Arduino:
     self.thread.start()
 
   def WriteOutput(self, pin, value):
-    self.signal_refresh.put((pin, value), True, None)
+    self.outputs[pin] = value
+    self.signal_refresh.put((pin, value), True, None)  # Values don't matter.
 
   def WriteServo(self, pin, start_degrees, end_degrees, seconds):
     raw_message = [chr(pin), chr(start_degrees), chr(end_degrees), chr(seconds)]
@@ -24,20 +25,22 @@ class Arduino:
     self.interface.Write(0, command)
     print "set servo"
 
+  def __SendOutputsMessage(self):
+    raw_message = []
+    for pin, value in self.outputs.iteritems():
+      raw_message.append(chr(pin))
+      raw_message.append(chr(value))
+    command = "SET_IO" + "".join(raw_message)
+    self.interface.Write(0, command)
+
   def __RefreshOutputs(self):
     while True:
-      raw_message = []
       try:
-        pin, value = self.signal_refresh.get(True, 1. / _REFRESH_RATE)
-        self.outputs[pin] = value
-        raw_message = [chr(pin), chr(value)]
+        unused_pin, unused_value = self.signal_refresh.get(True, 1. / _REFRESH_RATE)
+        self.__SendOutputsMessage()
       except Queue.Empty:
         # No refresh signals for a while, Refresh all pins
-        for pin, value in self.outputs.iteritems():
-          raw_message.append(chr(pin))
-          raw_message.append(chr(value))
-      command = "SET_IO" + "".join(raw_message)
-      self.interface.Write(0, command)
+        self.__SendOutputsMessage()
 
 
 def main():

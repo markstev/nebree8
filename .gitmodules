@@ -4,3 +4,6 @@
 [submodule "arduinoio"]
 	path = arduinoio
 	url = https://github.com/markstev/arduinoio
+[submodule "MS5803-14BA_Breakout"]
+	path = MS5803-14BA_Breakout
+	url = https://github.com/sparkfun/MS5803-14BA_Breakout

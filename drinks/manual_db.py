@@ -92,6 +92,15 @@ db = [
             Ingredient(Parts(1), 'Lime Juice')]),
 ]
 
+TEST_DRINK = Recipe(
+        name = 'Test drink',
+        total_oz = 2.75,
+        ingredients = [
+            Ingredient(Parts(2), 'Vodka'),
+            Ingredient(Parts(1), 'Bourbon'),
+            Ingredient(Parts(1), 'Rye'),
+            Ingredient(Parts(1), 'Rum')])
+
 
 if __name__ == "__main__":
     for r in db:

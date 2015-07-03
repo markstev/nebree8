@@ -165,6 +165,7 @@ class IOBank(object):
         time.sleep(0.5)
     else:
       if self.arduino:
+        print "Arduino write (%d) = %d" % (output_enum.value - _ARDUINO_ADDRESS_OFFSET, value)
         self.arduino.WriteOutput(output_enum.value - _ARDUINO_ADDRESS_OFFSET, value)
 
 
